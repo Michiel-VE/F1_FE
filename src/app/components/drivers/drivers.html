@@ -1,0 +1,83 @@
+<section class="flex justify-end mr-2 sm:mr-12">
+  <app-search [(searchedYear)]="year" (searchedYearChange)="onYearChange($event)"></app-search>
+</section>
+
+<section
+  class="mx-2 sm:mx-12 p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-4 items-stretch"
+>
+  @if (isLoading) {
+    @for (i of [1, 2, 3]; track i) {
+      <div
+        class="w-full max-w-lg bg-gray-800 rounded-xl p-6 sm:p-8 h-full justify-self-center animate-pulse"
+      >
+        <div class="h-8 bg-gray-700 rounded w-3/4 mb-4"></div>
+        <div class="h-4 bg-gray-700 rounded w-1/2 mb-8"></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2 h-10 bg-gray-700 rounded-lg"></div>
+          <div class="col-span-1 h-16 bg-gray-700 rounded-lg"></div>
+          <div class="col-span-1 h-16 bg-gray-700 rounded-lg"></div>
+        </div>
+      </div>
+    }
+  } @else {
+    @for (driver of drivers(); track driver.driverId) {
+      <div class="w-full max-w-lg bg-gray-800 rounded-xl p-6 sm:p-8 h-full justify-self-center">
+        <header class="flex justify-between items-start mb-6 pb-3 border-b border-red-500">
+          <div>
+            <h2 class="text-3xl font-extrabold text-gray-100 leading-tight">
+              {{ driver.firstname }} {{ driver.lastname }}
+            </h2>
+            <p class="text-sm font-medium text-red-400 mt-1">
+              {{ driver.teamSeasons[0]?.teamName }} ({{ driver.teamSeasons[0]?.shortName }})
+            </p>
+          </div>
+
+          <div class="text-right">
+            <p class="text-5xl font-black text-red-400 px-3 py-1 rounded-lg">
+              {{ driver.permanentNumber }}
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4 text-gray-50">
+          <div class="col-span-2 bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                Championship Points
+              </span>
+              <p class="text-3xl font-extrabold text-red-400">
+                {{ driver.teamSeasons[0]?.points }}
+              </p>
+            </div>
+          </div>
+
+          <div class="col-span-2 sm:col-span-1 bg-gray-700 p-3 rounded-lg border border-gray-600">
+            <span class="text-xs font-medium text-gray-400 block uppercase tracking-wider mb-1"
+              >Birthday</span
+            >
+            <p class="text-base font-semibold">
+              {{ driver.birthday | date: 'dd MMM yyyy' }}
+              <span class="text-sm text-gray-400">({{ driver.birthday | age }} yrs)</span>
+            </p>
+          </div>
+
+          <div class="col-span-2 sm:col-span-1 bg-gray-700 p-3 rounded-lg border border-gray-600">
+            <span class="text-xs font-medium text-gray-400 block uppercase tracking-wider mb-1"
+              >Nationality</span
+            >
+            <p class="text-base font-semibold truncate">
+              {{ driver.country }} ({{ driver.countryCode }})
+            </p>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div
+        class="md:col-span-2 lg:col-span-3 text-center p-12 rounded-xl bg-gray-700/50 border border-gray-600"
+      >
+        <p class="text-xl font-semibold text-gray-300">No drivers available for this season.</p>
+        <p class="text-sm text-gray-500 mt-2">Please check back later for updates.</p>
+      </div>
+    }
+  }
+</section>
