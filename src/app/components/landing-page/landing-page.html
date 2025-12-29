@@ -1,0 +1,83 @@
+<section class="relative min-h-screen bg-gray-950 text-gray-100 overflow-hidden">
+  <div
+    class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,0,0,0.1),transparent_70%)] pointer-events-none"
+  ></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 py-20">
+    <div class="text-center mb-20">
+      <h1 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-4">
+        Formula 1 <span class="text-red-600">Drivers</span> API
+      </h1>
+      <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+        Access detailed, season-based, and historical data about every driver in the world of
+        Formula 1. Built for data-driven speed enthusiasts.
+      </p>
+    </div>
+
+    <div class="space-y-12">
+      @for (item of endpoints; track item.title; let i = $index) {
+        <div
+          class="relative group rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden shadow-lg hover:shadow-red-800/30 transition-all duration-300"
+        >
+          <div
+            class="absolute inset-y-0 left-0 w-1 bg-linear-to-b {{
+              item.gradient
+            }} group-hover:w-2 transition-all duration-300"
+          ></div>
+
+          <div class="flex flex-col md:flex-row items-center gap-8 p-8 md:p-12 relative z-10">
+            <div
+              class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-linear-to-r {{
+                item.gradient
+              }}"
+            ></div>
+
+            <div class="flex-1">
+              <h2
+                class="text-2xl font-bold mb-3 text-white group-hover:text-red-500 transition-colors"
+              >
+                {{ item.title }}
+              </h2>
+              <p class="text-gray-400 mb-6 text-sm md:text-base">
+                {{ item.desc }}
+              </p>
+              <a
+                [routerLink]="[item.linkTo]"
+                class="relative inline-flex items-center gap-2 bg-linear-to-r {{
+                  item.gradient
+                }} hover:from-red-700 hover:to-red-800 text-white font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 shadow-lg shadow-red-900/20"
+              >
+                {{ item.btn }}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </a>
+            </div>
+
+            <div
+              class="hidden md:flex justify-center items-center relative w-48 h-48 rounded-xl bg-linear-to-br {{
+                item.gradient
+              }} bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"
+            >
+              <span
+                class="text-6xl font-bold text-white/20 group-hover:text-white/30 transition-all duration-300"
+                >{{ i + 1 }}</span
+              >
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
