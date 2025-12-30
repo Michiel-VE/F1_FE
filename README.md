@@ -1,59 +1,66 @@
-# F1App MADE IN ANGULAR
+# F1 Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.9.
+## Overview
 
-## Development server
+The F1 Frontend is the user interface for the Formula 1 Dashboard project. It is a Single Page Application (SPA) built with Angular 21 and styled with Tailwind CSS. The frontend communicates with the F1 API to display Formula 1 data such as driver standings, teams, races, and predictions.
 
-To start a local development server, run:
+## Features
 
-```bash
-ng serve
-```
+- View Formula 1 standings, teams, and races.
+- Display driver career history and profile.
+- User predictions functionality (e.g., prediction of race outcomes).
+- Routing for different pages (dashboard, teams, drivers, races).
+- Responsive design using Tailwind CSS.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## API Integration
 
-## Code scaffolding
+The frontend communicates with the backend API via RESTful endpoints. Below are some of the key API calls:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- `GET /api/v1/drivers`: Fetches all F1 drivers.
+- `GET /api/v1/teams`: Fetches all teams for a specific season.
+- `GET /api/v1/races`: Fetches all races for a specific season.
+- `POST /api/v1/prediction`: Submits a user’s prediction.
 
-```bash
-ng generate component component-name
-```
+### Authentication (Planned)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Currently, authentication is not implemented but will be added soon. Future plans include:
+- User login with JWT authentication.
+- Google OAuth for third-party authentication.
 
-```bash
-ng generate --help
-```
+## Project Structure
 
-## Building
+````
+───app
+│   ├───components
+│   │   ├───drivers
+│   │   ├───landing-page
+│   │   └───navbar
+│   ├───interfaces
+│   ├───pipe
+│   └───services
+└───environments
+````
 
-To build the project run:
 
-```bash
-ng build
-```
+## Routing and Pages
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The application has the following main routes/pages:
 
-## Running unit tests
+- `/`: Dashboard with current season standings and stats.
+- `/drivers`: List of all F1 drivers.
+- `/teams`: List of all teams for the current season.
+- `/races`: List of all races in the current season.
+- `/profile`: View and manage user profile (to be implemented).
+- `/prediction`: Make and view race predictions.
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Styling
 
-```bash
-ng test
-```
+The frontend uses Tailwind CSS for responsive design and UI customization. The utility-first approach makes styling components easy and maintainable.
 
-## Running end-to-end tests
+## Setup and Development
 
-For end-to-end (e2e) testing, run:
+### Requirements
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Node.js (>= 14.x)
+- Angular CLI (>= 12.x)
+- Tailwind CSS configured
