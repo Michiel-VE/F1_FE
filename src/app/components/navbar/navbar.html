@@ -1,15 +1,21 @@
-<nav class="bg-black border-b border-gray-700 text-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-16 items-center">
-      <a routerLink="/" class="text-red-600 font-bold text-xl">F1_API</a>
+<nav class="fixed top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-white/5 selection:bg-red-600/30">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="flex justify-between h-20 items-center">
+      
+      <a routerLink="/" class="group flex items-center gap-2">
+        <div class="w-1.5 h-6 bg-red-600 -skew-x-12 group-hover:scale-y-110 transition-transform duration-300"></div>
+        <span class="text-white font-black text-2xl tracking-tighter uppercase">
+          F1<span class="text-red-600">_</span>API
+        </span>
+      </a>
 
-      <ul class="hidden md:flex space-x-8">
-        @for (link of links; track link.name) {
+      <ul class="hidden md:flex items-center space-x-1">
+        @for (link of links(); track link.name) {
           <li>
             <a
               [routerLink]="link.path"
-              routerLinkActive="text-red-600 border-b-2 border-red-600"
-              class="text-gray-300 hover:text-red-500 transition-colors duration-200 font-medium"
+              routerLinkActive="text-white after:scale-x-100"
+              class="relative px-4 py-2 text-[0.7rem] font-bold tracking-[0.25em] uppercase text-gray-500 hover:text-white transition-all duration-300 after:content-[''] after:absolute after:bottom-0 after:left-4 after:right-4 after:h-[2px] after:bg-red-600 after:scale-x-0 after:transition-transform after:duration-500 hover:after:scale-x-100"
             >
               {{ link.name }}
             </a>
@@ -18,60 +24,39 @@
       </ul>
 
       <button
-        class="md:hidden focus:outline-none text-gray-300 hover:text-red-500"
+        class="md:hidden group relative w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:text-white transition-colors"
         (click)="toggleMenu()"
+        aria-label="Menu"
       >
-        @if (!isMenuOpen) {
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        } @else {
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        }
+        <span class="h-0.5 w-6 bg-current transition-all duration-300" [class.rotate-45]="isMenuOpen()" [class.translate-y-2]="isMenuOpen()"></span>
+        <span class="h-0.5 w-6 bg-current transition-opacity" [class.opacity-0]="isMenuOpen()"></span>
+        <span class="h-0.5 w-6 bg-current transition-all duration-300" [class.-rotate-45]="isMenuOpen()" [class.-translate-y-2]="isMenuOpen()"></span>
       </button>
     </div>
   </div>
 
-  @if (isMenuOpen) {
-    <div class="md:hidden bg-gray-900 border-t border-gray-800">
-      <ul class="flex flex-col space-y-2 px-4 py-3">+
-        @for (link of links; track link.name) {
-          <li>
+  @if (isMenuOpen()) {
+    <div 
+      animate.enter="nav-open" 
+      animate.leave="nav-close"
+      class="md:hidden bg-black/95 border-t border-white/5 px-8 py-10"
+    >
+      <ul class="flex flex-col space-y-8">
+        @for (link of links(); track link.name; let i = $index) {
+          <li class="nav-stagger" [style.animation-delay.ms]="i * 50">
             <a
               [routerLink]="link.path"
-              routerLinkActive="text-red-600"
-              class="block text-gray-300 hover:text-red-500 transition-colors duration-200"
-            (click)="toggleMenu()"
-          >
-            {{ link.name }}
-          </a>
-        </li>
-      }
+              routerLinkActive="text-red-600 translate-x-3"
+              class="inline-block text-2xl font-black uppercase italic tracking-tighter text-gray-400 transition-all duration-300 hover:text-white"
+              (click)="toggleMenu()"
+            >
+              {{ link.name }}
+            </a>
+          </li>
+        }
       </ul>
     </div>
   }
 </nav>
+
+<div class="h-20"></div>

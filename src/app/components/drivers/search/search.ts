@@ -6,27 +6,27 @@ import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angul
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './search.html',
-  styleUrl: './search.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Search implements OnInit {
   searchedYear = model<string>(new Date().getFullYear().toString());
+
   years = signal<number[]>([]);
   searchForm!: FormGroup;
   private fb = inject(FormBuilder);
 
   ngOnInit() {
-    const currentYear = new Date().getFullYear();
-    const yearList: number[] = [];
-    for (let year = currentYear; year >= currentYear - 5; year--) {
-      yearList.push(year);
-    }
-    this.years.set(yearList);
+    this.years.set(this.generateYears());
 
     this.searchForm = this.fb.group({
       seasonYear: new FormControl(this.searchedYear(), { nonNullable: true }),
     });
   }
+
+  private generateYears(): number[] {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 6 }, (_, i) => currentYear - i);
+}
 
   onSubmit() {
     const selectedValue = this.searchForm.get('seasonYear')?.value;
