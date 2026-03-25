@@ -13,12 +13,11 @@ import { Team } from '../../interfaces/team';
 import { ErrorState } from '../../interfaces/error-state';
 import { finalize } from 'rxjs/operators';
 import { TeamCard } from './team/team';
-import { Search } from '../drivers/search/search';
 
 @Component({
   selector: 'app-teams',
   standalone: true,
-  imports: [CommonModule, TeamCard, Search],
+  imports: [CommonModule, TeamCard, Headers],
   templateUrl: './teams.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,25 +1,22 @@
-<!-- Header -->
-<section class="mx-4 sm:mx-12 mt-8 mb-6">
-  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-    <div>
-      <p class="text-[0.65rem] font-semibold tracking-[0.2em] uppercase text-red-500 mb-1">
-        {{ selectedYear() }} Season
-      </p>
-      <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-none">
-        Constructor Standings
-      </h1>
-    </div>
-    <app-search [(searchedYear)]="year" (searchedYearChange)="onYearChange($event)" />
-  </div>
-  <div class="mt-3 h-px bg-gradient-to-r from-red-600 via-red-600/30 to-transparent"></div>
-</section>
+<app-header
+  title="Constructor Standings"
+  [selectedYear]="selectedYear()"
+  [(searchedYear)]="year"
+  (searchedYearChange)="onYearChange($event)"
+/>
 
 <!-- Error -->
 @if (error()) {
-  <div class="mx-4 sm:mx-12 mb-6 flex items-center justify-between gap-4 bg-red-950/40 border border-red-800/50 rounded-xl px-5 py-4">
+  <div
+    class="mx-4 sm:mx-12 mb-6 flex items-center justify-between gap-4 bg-red-950/40 border border-red-800/50 rounded-xl px-5 py-4"
+  >
     <div class="flex items-center gap-3">
       <svg class="w-5 h-5 text-red-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7.5a.75.75 0 100-1.5.75.75 0 000 1.5z"
+          clip-rule="evenodd"
+        />
       </svg>
       <p class="text-sm text-red-300">{{ error()!.message }}</p>
     </div>
@@ -35,11 +32,14 @@
 }
 
 <!-- Grid -->
-<section class="mx-4 sm:mx-12 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
-
+<section
+  class="mx-4 sm:mx-12 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch"
+>
   @if (isLoading()) {
-    @for (i of [1,2,3,4,5,6]; track i) {
-      <div class="relative bg-white/[0.03] border border-white/[0.07] rounded-xl p-5 overflow-hidden animate-pulse">
+    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+      <div
+        class="relative bg-white/[0.03] border border-white/[0.07] rounded-xl p-5 overflow-hidden animate-pulse"
+      >
         <div class="flex flex-col gap-3">
           <div class="flex justify-between items-start">
             <div class="flex flex-col gap-2">
@@ -56,24 +56,26 @@
         </div>
       </div>
     }
-
   } @else {
     @for (team of teams(); track team.id; let idx = $index) {
       <app-team-card [team]="team" [position]="idx + 1" />
-    }
 
-    @empty {
+    } @empty {
       <div class="col-span-full flex flex-col items-center gap-3 py-20 text-center">
         <svg class="w-12 h-12 text-gray-600" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="18" cy="20" r="2" fill="currentColor"/>
-          <circle cx="30" cy="20" r="2" fill="currentColor"/>
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" />
+          <path
+            d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <circle cx="18" cy="20" r="2" fill="currentColor" />
+          <circle cx="30" cy="20" r="2" fill="currentColor" />
         </svg>
         <p class="text-xl font-bold text-gray-400">No teams found</p>
         <p class="text-sm text-gray-600">Check back later for updates.</p>
       </div>
     }
   }
-
 </section>

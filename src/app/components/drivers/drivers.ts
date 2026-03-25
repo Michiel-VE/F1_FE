@@ -13,13 +13,13 @@ import { Driver } from '../../interfaces/driver';
 import { ErrorState } from '../../interfaces/error-state';
 import { AgePipe } from '../../pipe/age/age-pipe';
 import { finalize } from 'rxjs/operators';
-import { Search } from './search/search';
 import { TeamInfo } from '../../interfaces/team-info';
+import { Header } from '../common/header/header';
 
 @Component({
   selector: 'app-drivers',
   standalone: true,
-  imports: [CommonModule, AgePipe, Search],
+  imports: [CommonModule, AgePipe, Header],
   templateUrl: './drivers.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
