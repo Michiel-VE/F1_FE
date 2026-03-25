@@ -16,30 +16,37 @@ import { Race } from '../../../interfaces/race';
 })
 export class RaceCard {
   race = input.required<Race>();
-  index = input<number>(0);
+  roundNumber = input<number>(0);   // 0 = pre-season/testing, not a round
   isCurrent = input<boolean>(false);
   isUpcoming = input<boolean>(false);
   isPast = input<boolean>(false);
   isLast = input<boolean>(false);
+  dimPast = input<boolean>(true);   // false for historical year view
+
+  readonly isRound = computed(() => this.roundNumber() > 0);
 
   readonly startDate = computed(() => new Date(this.race().startDay));
   readonly endDate = computed(() => new Date(this.race().endDay));
 
   readonly monthShort = computed(() =>
-    this.startDate().toLocaleString('en-GB', { month: 'short' }).toUpperCase()
+    this.startDate().toLocaleString('en-GB', { month: 'short' }).toUpperCase(),
   );
 
-  readonly dayStart = computed(() =>
-    this.startDate().getDate().toString().padStart(2, '0')
+  readonly dayStart = computed(() => this.startDate().getDate());
+  readonly dayEnd = computed(() => this.endDate().getDate());
+
+  readonly isMultiDay = computed(
+    () => this.race().startDay !== this.race().endDay,
   );
 
-  readonly dayEnd = computed(() =>
-    this.endDate().getDate().toString().padStart(2, '0')
-  );
-
-  readonly isMultiDay = computed(() =>
-    this.startDate().getDate() !== this.endDate().getDate()
-  );
+  // "APR 10–12" all on one line in the date column
+  readonly dateRange = computed(() => {
+    const start = this.dayStart();
+    const end = this.dayEnd();
+    const month = this.monthShort();
+    if (this.isMultiDay()) return `${month} ${start}–${end}`;
+    return `${month} ${start}`;
+  });
 
   readonly daysUntil = computed(() => {
     if (!this.isUpcoming()) return null;
@@ -47,13 +54,12 @@ export class RaceCard {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   });
 
-  readonly raceName = computed(() => {
-    // Strip the year and "FORMULA 1" prefix for a cleaner display
-    return this.race().name
+  readonly raceName = computed(() =>
+    this.race().name
       .replace(/^FORMULA 1\s*/i, '')
       .replace(/\s*\d{4}$/, '')
-      .trim();
-  });
+      .trim(),
+  );
 
   readonly statusLabel = computed(() => {
     if (this.isCurrent()) return 'Live';

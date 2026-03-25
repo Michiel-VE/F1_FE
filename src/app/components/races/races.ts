@@ -14,7 +14,7 @@ import { RaceService } from '../../services/race/race-service';
 import { Race } from '../../interfaces/race';
 import { ErrorState } from '../../interfaces/error-state';
 import { RaceCard } from './race/race';
-import { Header } from "../common/header/header";
+import { Header } from '../common/header/header';
 
 @Component({
   selector: 'app-races',
@@ -33,14 +33,54 @@ export class Races implements OnInit {
   readonly races = signal<Race[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal<ErrorState | null>(null);
+  readonly pastExpanded = signal(false);
 
-  readonly currentRaceIndex = computed(() => {
-    const now = new Date();
-    const list = this.races();
+  readonly isCurrentYear = computed(
+    () => this.selectedYear() === new Date().getFullYear().toString(),
+  );
 
-    // Find the first race that hasn't fully ended yet
-    const idx = list.findIndex((r) => new Date(r.endDay) >= now);
-    return idx === -1 ? list.length - 1 : idx;
+  private readonly isRaceRound = (race: Race): boolean => !/pre-season|testing/i.test(race.name);
+
+  readonly roundNumbers = computed(() => {
+    const map = new Map<string, number>();
+    let round = 0;
+    for (const race of this.races()) {
+      if (this.isRaceRound(race)) {
+        map.set(race.id, ++round);
+      } else {
+        map.set(race.id, 0);
+      }
+    }
+    return map;
+  });
+
+  readonly nextUpRace = computed(
+    () => this.races().find((r) => this.isUpcoming(r) || this.isCurrentRace(r)) ?? null,
+  );
+
+  readonly pastRaces = computed(() => this.races().filter((r) => this.isPast(r)));
+  readonly pastCount = computed(() => this.pastRaces().length);
+
+  /** Last 1 past races shown as hint when collapsed */
+  readonly hintRaces = computed(() => this.pastRaces().slice(-1));
+
+  readonly visibleRaces = computed(() => {
+    if (!this.isCurrentYear()) return this.races();
+    const upcoming = this.races().filter((r) => !this.isPast(r));
+    if (this.pastExpanded()) return this.races();
+    return [...this.hintRaces(), ...upcoming];
+  });
+
+  /** How many past races are hidden (total past minus the 1 hint) */
+  readonly hiddenPastCount = computed(() => {
+    if (!this.isCurrentYear() || this.pastExpanded()) return 0;
+    return Math.max(0, this.pastCount() - 1);
+  });
+
+  /** The id of the last hint race — button renders right after this one */
+  readonly lastHintRaceId = computed(() => {
+    const hints = this.hintRaces();
+    return hints.length > 0 ? hints[hints.length - 1].id : null;
   });
 
   ngOnInit(): void {
@@ -49,11 +89,16 @@ export class Races implements OnInit {
 
   onYearChange(newYear: string): void {
     this.selectedYear.set(newYear);
+    this.pastExpanded.set(false);
     this.fetchRaces();
   }
 
   retryFetch(): void {
     this.fetchRaces();
+  }
+
+  togglePast(): void {
+    this.pastExpanded.update((v) => !v);
   }
 
   isCurrentRace(race: Race): boolean {
@@ -67,6 +112,10 @@ export class Races implements OnInit {
 
   isPast(race: Race): boolean {
     return new Date(race.endDay) < new Date();
+  }
+
+  getRoundNumber(race: Race): number {
+    return this.roundNumbers().get(race.id) ?? 0;
   }
 
   private fetchRaces(): void {
