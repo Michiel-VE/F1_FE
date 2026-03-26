@@ -1,16 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  computed,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
+
 import { Team } from '../../../interfaces/team';
 
 @Component({
   selector: 'app-team-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './team.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -12,14 +12,18 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 
-// Updated helmet configuration including localhost for development
+/**
+ * Helmet configuration
+ */
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'unsafe-inline'"], 
         styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: [
           "'self'", 
@@ -27,7 +31,6 @@ app.use(
           "http://localhost:8080"
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       },
     },
   })
