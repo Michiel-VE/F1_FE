@@ -25,7 +25,7 @@ export class LandingPage {
     {
       title: 'All F1 Drivers',
       desc: 'Get a full list of every Formula 1 driver — past and present.',
-      btn: 'View All',
+      btn: 'View 2026 Drivers',
       linkTo: '/drivers',
     },
     {
