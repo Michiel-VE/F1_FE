@@ -6,7 +6,7 @@ import {
   DestroyRef,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TeamService } from '../../services/team/team-service';
 import { Team } from '../../interfaces/team';
@@ -18,7 +18,7 @@ import { Header } from '../common/header/header';
 @Component({
   selector: 'app-teams',
   standalone: true,
-  imports: [CommonModule, TeamCard, Header],
+  imports: [TeamCard, Header],
   templateUrl: './teams.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -49,31 +49,31 @@ export class Teams implements OnInit {
     this.fetchTeams();
   }
 
- private fetchTeams(): void {
-  this.isLoading.set(true);
-  this.error.set(null);
+  private fetchTeams(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
 
-  const year = this.selectedYear();
-  const cacheKey = `f1_teams_${year}`;
+    const year = this.selectedYear();
+    const cacheKey = `f1_teams_${year}`;
 
-  this.teamService
-    .getData<Team[]>(cacheKey, year)
-    .pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => this.isLoading.set(false)),
-    )
-    .subscribe({
-      next: (data) => this.teams.set(data || []),
-      error: (err) => {
-        this.error.set({
-          message: this.extractErrorMessage(err),
-          timestamp: new Date(),
-          canRetry: true,
-        });
-        console.error('[Teams] Error fetching teams:', err);
-      },
-    });
-}
+    this.teamService
+      .getData<Team[]>(cacheKey, year)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.isLoading.set(false)),
+      )
+      .subscribe({
+        next: (data) => this.teams.set(data || []),
+        error: (err) => {
+          this.error.set({
+            message: this.extractErrorMessage(err),
+            timestamp: new Date(),
+            canRetry: true,
+          });
+          console.error('[Teams] Error fetching teams:', err);
+        },
+      });
+  }
 
   private extractErrorMessage(err: Error): string {
     if (typeof err === 'string') return err;
