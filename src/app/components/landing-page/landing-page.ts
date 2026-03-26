@@ -23,9 +23,9 @@ export class LandingPage {
 
   readonly endpoints = signal<Endpoint[]>([
     {
-      title: 'All F1 Drivers',
+      title: `Season ${this.currentYear()} F1 Drivers`,
       desc: 'Get a full list of every Formula 1 driver — past and present.',
-      btn: 'View 2026 Drivers',
+      btn: `View ${this.currentYear()} Drivers`,
       linkTo: '/drivers',
     },
     {
