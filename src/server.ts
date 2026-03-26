@@ -23,7 +23,7 @@ app.use(
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: [
           "'self'", 
-          "https://your-java-backend.onrender.com", 
+          "https://yvcwhbkh2l.execute-api.eu-north-1.amazonaws.com", 
           "http://localhost:8080"
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
