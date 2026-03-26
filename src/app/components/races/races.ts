@@ -10,6 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { RaceService } from '../../services/race/race-service';
 import { Race } from '../../interfaces/race';
 import { ErrorState } from '../../interfaces/error-state';
@@ -22,6 +23,18 @@ import { Header } from '../common/header/header';
   imports: [CommonModule, RaceCard, Header],
   templateUrl: './races.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ height: '0px', opacity: 0, overflow: 'hidden' }),
+        animate('350ms ease-out', style({ height: '*', opacity: 1 })),
+      ]),
+      transition(':leave', [
+        style({ height: '*', overflow: 'hidden' }),
+        animate('300ms ease-in', style({ height: '0px', opacity: 0 })),
+      ]),
+    ]),
+  ],
 })
 export class Races implements OnInit {
   private readonly raceService = inject(RaceService);
