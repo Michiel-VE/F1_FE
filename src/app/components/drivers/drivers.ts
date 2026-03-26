@@ -9,17 +9,18 @@ import {
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DriverService } from '../../services/driver/driver-service';
-import { Driver } from '../../interfaces/driver';
+import { Driver as DriverI } from '../../interfaces/driver';
 import { ErrorState } from '../../interfaces/error-state';
 import { AgePipe } from '../../pipe/age/age-pipe';
 import { finalize } from 'rxjs/operators';
 import { TeamInfo } from '../../interfaces/team-info';
 import { Header } from '../common/header/header';
+import { Driver } from './driver/driver';
 
 @Component({
   selector: 'app-drivers',
   standalone: true,
-  imports: [CommonModule, AgePipe, Header],
+  imports: [CommonModule, Header, Driver],
   templateUrl: './drivers.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -30,7 +31,7 @@ export class Drivers implements OnInit {
   private readonly CACHE_KEY_PREFIX = 'f1_drivers_list_';
 
   readonly selectedYear = signal<string>(new Date().getFullYear().toString());
-  readonly drivers = signal<Driver[]>([]);
+  readonly drivers = signal<DriverI[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal<ErrorState | null>(null);
 
@@ -50,7 +51,7 @@ export class Drivers implements OnInit {
     this.error.set(null);
 
     this.driverService
-      .getData<Driver[]>(
+      .getData<DriverI[]>(
         `${this.CACHE_KEY_PREFIX}${this.selectedYear()}`,
         this.selectedYear()
       )
@@ -76,18 +77,6 @@ export class Drivers implements OnInit {
 
   retryFetch(): void {
     this.fetchDrivers();
-  }
-
-  getTeamInfo(driver: Driver): TeamInfo {
-    const team = driver.teamSeasons?.[0];
-    return {
-      name: team?.teamName ?? 'Unknown Team',
-      shortName: team?.shortName ?? 'N/A',
-    };
-  }
-
-  getPoints(driver: Driver): number {
-    return driver.teamSeasons?.[0]?.points ?? 0;
   }
 
   private extractErrorMessage(err: Error): string {

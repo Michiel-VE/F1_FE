@@ -1,14 +1,15 @@
 <article
-  class="group relative bg-white/[0.03] border rounded-xl overflow-hidden p-5 pl-14 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl h-full flex flex-col"
-  [class]="borderClass()"
+  class="group relative bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden p-5 pl-14 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl h-full flex flex-col"
 >
-  <div class="absolute left-0 top-0 bottom-0 w-[3px]" [class]="stripeClass()"></div>
+  <div
+    class="absolute left-0 top-0 bottom-0 w-[3px] z-20"
+    [style.background]="borderAccent(position())"
+  ></div>
 
   <div
-    class="absolute left-2.5 top-5 w-9 h-9 rounded-lg flex items-center justify-center border"
-    [class]="badgeClass()"
+    class="absolute left-2.5 top-5 w-9 h-9 flex items-center justify-center"
   >
-    <span class="text-[1.05rem] font-black leading-none" [class]="posNumClass()">
+    <span class="text-2xl font-black leading-none" [class]="posNumClass()">
       {{ position() }}
     </span>
   </div>
@@ -22,7 +23,7 @@
           >{{ team().shortName }}</span
         >
         @if (isPodium()) {
-          <span class="text-[0.6rem] font-semibold tracking-wider uppercase text-gray-500">
+          <span class="text-[0.6rem] font-semibold tracking-wider uppercase text-gray-300">
             P{{ position() }}
           </span>
         }
@@ -36,9 +37,9 @@
       <div class="h-px bg-white/[0.06] w-full mb-3"></div>
     </div>
 
-    <div class="grid grid-cols-2 gap-2 mt-auto">
+    <div class="grid grid-cols-2 gap-2 mt-auto pt-4">
       <div class="bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2.5">
-        <p class="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-gray-500 mb-1">
+        <p class="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-gray-400 mb-1">
           Country
         </p>
         <div class="flex items-center gap-1.5">
@@ -46,14 +47,14 @@
             <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" />
             <path d="M8 1.5v13M1.5 8h13" stroke="currentColor" stroke-width="1.5" />
           </svg>
-          <p class="text-[0.65rem] sm:text-sm font-semibold text-white truncate">
+          <p class="text-sm sm:text-md font-semibold text-white truncate">
             {{ team().country }}
           </p>
         </div>
       </div>
 
       <div class="bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2.5">
-        <p class="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-gray-500 mb-1">Base</p>
+        <p class="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-gray-400 mb-1">Base</p>
         <div class="flex items-center gap-1.5">
           <svg class="w-3 h-3 text-gray-500 flex-shrink-0" viewBox="0 0 16 16" fill="none">
             <path
@@ -63,7 +64,7 @@
             />
             <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.5" />
           </svg>
-          <p class="text-[0.65rem] sm:text-sm font-semibold text-white truncate">
+          <p class="text-sm sm:text-md font-semibold text-white truncate">
             {{ team().base }}
           </p>
         </div>

@@ -1,0 +1,109 @@
+<article
+  class="group relative bg-white/[0.03] border rounded-xl overflow-hidden pl-14 pr-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl h-full flex flex-col"
+>
+  <div
+    class="absolute left-0 top-0 bottom-0 w-[3px]"
+    [style.background]="borderAccent(position())"
+    [class.bg-red-600]="position() > 3"
+  ></div>
+
+  <div
+    class="absolute right-2 top-10 -translate-y-1/2 text-[5.5rem] font-black leading-none select-none pointer-events-none text-white/[0.04]"
+    aria-hidden="true"
+  >
+    {{ driver().permanentNumber }}
+  </div>
+
+  <div class="absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center">
+    <span
+      class="text-2xl font-black leading-none"
+      [class.text-yellow-400]="position() === 1"
+      [class.text-slate-300]="position() === 2"
+      [class.text-orange-400]="position() === 3"
+      [class.text-red-500]="position() > 3"
+    >
+      {{ position() }}
+    </span>
+  </div>
+
+  <div class="relative flex flex-col gap-2.5 flex-1">
+    <div>
+      <p
+        class="text-[0.65rem] font-semibold tracking-[0.1em] uppercase text-gray-400 leading-none mb-0.5"
+      >
+        {{ driver().firstname }}
+      </p>
+      <p
+        class="text-[1.55rem] font-black leading-none tracking-tight"
+        [class.text-yellow-400]="position() === 1"
+        [class.text-slate-300]="position() === 2"
+        [class.text-orange-400]="position() === 3"
+        [class.text-red-500]="position() > 3"
+      >
+        {{ driver().lastname }}
+      </p>
+
+      <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        <span
+          class="text-[0.65rem] font-semibold tracking-widest uppercase bg-white/[0.06] border border-white/[0.08] rounded px-1.5 py-0.5 text-white"
+        >
+          {{ getTeamInfo(driver()).shortName }}
+        </span>
+        <span class="text-[0.7rem] text-gray-400 truncate">
+          {{ getTeamInfo(driver()).name }}
+        </span>
+      </div>
+    </div>
+
+    <div class="flex-1 flex flex-col justify-center">
+      <div class="h-px bg-white/[0.06] w-full"></div>
+    </div>
+
+    <div class="mt-auto space-y-2.5">
+      <div class="flex items-baseline justify-between py-1">
+        <span class="text-[0.6rem] font-medium tracking-[0.14em] uppercase text-gray-200">
+          Championship Points
+        </span>
+        <span class="text-[1.7rem] font-black text-white leading-none">
+          {{ getPoints(driver()) }}
+        </span>
+      </div>
+
+      <div class="flex gap-1.5 flex-wrap">
+        <span
+          class="inline-flex items-center gap-1 bg-white/[0.05] border border-white/[0.07] rounded-md px-2 py-1"
+        >
+          <span class="text-[0.6rem] font-bold tracking-wider uppercase text-red-400 sm:pt-0.5">
+            {{ driver().countryCode }}
+          </span>
+          <span class="text-[0.7rem] text-gray-200">{{ driver().country }}</span>
+        </span>
+        <span
+          class="inline-flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.07] rounded-md px-2 py-1"
+        >
+          <svg class="w-3 h-3 text-gray-500 flex-shrink-0" viewBox="0 0 16 16" fill="none">
+            <rect
+              x="1"
+              y="2"
+              width="14"
+              height="12"
+              rx="2"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="M1 6h14M5 1v2M11 1v2"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span class="text-[0.7rem] text-gray-200">{{
+            driver().birthday | date: 'dd MMM yyyy'
+          }}</span>
+          <span class="text-[0.65rem] text-gray-300">({{ driver().birthday | age }} yrs)</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</article>
