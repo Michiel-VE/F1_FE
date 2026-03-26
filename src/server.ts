@@ -11,7 +11,28 @@ import { join } from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-app.use(helmet());
+
+// Updated helmet configuration including localhost for development
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: [
+          "'self'", 
+          "https://your-java-backend.onrender.com", 
+          "http://localhost:8080"
+        ],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      },
+    },
+  })
+);
+
 const angularApp = new AngularNodeAppEngine();
 
 /**
