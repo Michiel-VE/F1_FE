@@ -54,7 +54,7 @@
     [class.border-white/[0.04]]="isPast() && dimPast()"
     [class.border-white/[0.07]]="isPast() && !dimPast()"
     [class.opacity-35]="isPast() && dimPast()"
-    [class.hover:opacity-60]="isPast() && dimPast()"
+    [class.hover:opacity-90]="isPast() && dimPast()"
   >
     <div class="px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
 
@@ -64,7 +64,7 @@
             <span class="text-[0.6rem] font-semibold tracking-[0.15em] uppercase"
               [class.text-red-400]="isCurrent()"
               [class.text-gray-500]="!isCurrent()"
-            >R{{ roundNumber() }}</span>
+            >Round {{ roundNumber() }}</span>
           } @else {
             <span class="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-gray-600">
               Pre
