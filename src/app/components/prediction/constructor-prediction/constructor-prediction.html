@@ -1,0 +1,133 @@
+<div class="max-w-6xl mx-auto p-6 lg:mt-10">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Available pool -->
+    <div class="space-y-4">
+      <h2
+        class="text-white font-black uppercase italic tracking-tighter text-xl border-l-4 border-gray-600 pl-3"
+      >
+        Select Teams
+      </h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" [@listAnimation]="availablePool().length">
+        @for (team of availablePool(); track team.id) {
+          <button
+            (click)="addToRanked(team)"
+            class="bg-white/5 border border-white/10 cursor-pointer p-4 rounded-sm hover:bg-red-600/20 hover:border-red-600 transition-all text-left group"
+          >
+            <span
+              class="text-[0.6rem] text-gray-500 font-bold uppercase tracking-widest block mb-1"
+            >
+              Points: {{ team.totalPoints }}
+            </span>
+            <span
+              class="text-white font-black uppercase italic tracking-tighter block group-hover:text-red-500"
+            >
+              {{ team.shortName }}
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Ranked selection -->
+    <div class="bg-black/40 border border-white/5 rounded-sm p-6 backdrop-blur-md">
+      <div class="flex justify-between items-center mb-6 border-l-4 border-red-600 pl-3">
+        <h2 class="text-white font-black uppercase italic tracking-tighter text-xl">
+          Your Standing
+        </h2>
+        @if (rankedSelection().length > 0) {
+          <button
+            @fadeIn
+            (click)="rankedSelection.set([])"
+            class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 hover:text-red-500 transition-colors"
+          >
+            Clear All
+          </button>
+        }
+      </div>
+
+      <div class="space-y-2" [@rankListAnimation]="rankedSelection().length">
+        @for (
+          team of rankedSelection();
+          track team.id;
+          let i = $index;
+          let first = $first;
+          let last = $last
+        ) {
+          <div
+            class="flex items-center gap-4 bg-white/5 p-3 border-l-2 border-red-600"
+            [class]="getSwapClass(team.id)"
+          >
+            <!-- Arrows -->
+            <div class="flex flex-col gap-1">
+              <button
+                (click)="moveRank(i, 'up')"
+                [disabled]="first"
+                class="text-gray-600 hover:text-white disabled:opacity-0 transition-all duration-150 cursor-pointer hover:scale-110 active:scale-95"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="3"
+                    d="M5 15l7-7 7 7"
+                  />
+                </svg>
+              </button>
+              <button
+                (click)="moveRank(i, 'down')"
+                [disabled]="last"
+                class="text-gray-600 hover:text-white disabled:opacity-0 transition-all duration-150 cursor-pointer hover:scale-110 active:scale-95"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="3"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Position -->
+            <span class="text-red-600 font-black italic text-2xl w-10 text-center">
+              P{{ i + 1 }}
+            </span>
+
+            <!-- Name -->
+            <div class="flex-grow">
+              <span class="text-white font-black uppercase italic tracking-tighter">
+                {{ team.shortName }}
+              </span>
+            </div>
+
+            <!-- Remove -->
+            <button
+              (click)="removeFromRanked(team)"
+              class="text-gray-500 hover:text-red-500 text-[0.6rem] uppercase font-bold tracking-widest cursor-pointer transition-colors duration-150 hover:scale-105 active:scale-95"
+            >
+              Remove
+            </button>
+          </div>
+        } @empty {
+          <div
+            @fadeIn
+            class="py-10 text-center border-2 border-dashed border-white/5 text-gray-600 uppercase font-bold tracking-[0.2em] text-xs"
+          >
+            Tap teams to build your ranking
+          </div>
+        }
+      </div>
+
+      @if (rankedSelection().length === allTeams().length && allTeams().length > 0) {
+        <button
+          @fadeIn
+          (click)="submitPrediction()"
+          class="w-full mt-8 cursor-pointer bg-red-600 hover:bg-red-700 text-white font-black uppercase italic py-4 tracking-widest transition-all shadow-lg shadow-red-600/10 active:scale-[0.99]"
+        >
+          Confirm Prediction
+        </button>
+      }
+    </div>
+  </div>
+</div>
