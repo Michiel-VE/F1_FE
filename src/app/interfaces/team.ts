@@ -4,6 +4,5 @@ export interface Team {
   country: string,
   shortName: string,
   base: string,
-  created_at: string,
-  updated_at: string | null
+  totalPoints: number,
 }
