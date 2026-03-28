@@ -6,38 +6,47 @@
     [style.background]="borderAccent(position())"
   ></div>
 
-  <div
-    class="absolute left-2.5 top-5 w-9 h-9 flex items-center justify-center"
-  >
+  <div class="absolute left-2.5 top-5 w-9 h-9 flex items-center justify-center">
     <span class="text-2xl font-black leading-none" [class]="posNumClass()">
       {{ position() }}
     </span>
   </div>
 
-  <div class="relative flex flex-col flex-1">
-    <div class="mb-3">
-      <div class="flex items-center gap-2 mb-0.5">
-        <span
-          class="text-[0.65rem] font-bold tracking-[0.15em] uppercase px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]"
-          [class]="accentTextClass()"
-          >{{ team().shortName }}</span
-        >
-        @if (isPodium()) {
-          <span class="text-[0.6rem] font-semibold tracking-wider uppercase text-gray-300">
-            P{{ position() }}
-          </span>
-        }
+  <div class="relative mb-3">
+    <div class="flex items-center gap-2 mb-0.5">
+      <span
+        class="text-[0.65rem] font-bold tracking-[0.15em] uppercase px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]"
+        [class]="accentTextClass()"
+        >{{ team().shortName }}</span
+      >
+      @if (isPodium()) {
+        <span class="text-[0.6rem] font-semibold tracking-wider uppercase text-gray-300">
+          P{{ position() }}
+        </span>
+      }
+    </div>
+    <h2 class="text-xl font-black text-white leading-tight tracking-tight break-words">
+      {{ team().name }}
+    </h2>
+  </div>
+
+  <div class="flex-1"></div>
+
+  <div class="mt-auto">
+    <div class="h-px bg-white/[0.06] w-full mb-3"></div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div class="flex items-center">
+        <p class="text-sm font-medium uppercase text-gray-400">Points</p>
       </div>
-      <h2 class="text-xl font-black text-white leading-tight tracking-tight break-words">
-        {{ team().name }}
-      </h2>
+      <div class="flex justify-end items-end gap-1.5 mr-3">
+        <p class="text-md sm:text-xl font-semibold text-white">
+          {{ team().totalPoints }}
+        </p>
+      </div>
     </div>
 
-    <div class="flex-1">
-      <div class="h-px bg-white/[0.06] w-full mb-3"></div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-2 mt-auto pt-4">
+    <div class="h-px bg-white/[0.06] w-full mb-4"></div>
+    <div class="grid grid-cols-2 gap-2">
       <div class="bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2.5">
         <p class="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-gray-400 mb-1">
           Country

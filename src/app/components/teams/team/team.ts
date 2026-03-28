@@ -16,22 +16,6 @@ export class TeamCard {
 
   readonly isPodium = computed(() => this.position() <= 3);
 
-  // How long the team has existed
-  readonly yearsActive = computed(() => {
-    const created = new Date(this.team().created_at);
-    return new Date().getFullYear() - created.getFullYear();
-  });
-
-  readonly lastUpdated = computed(() => {
-    const date = this.team().updated_at ?? this.team().created_at;
-    return new Date(date).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  });
-
-  // Podium colour helpers — full class strings so Tailwind doesn't purge them
    borderAccent(pos: number) {
       return getPodiumGradient(pos);
     }

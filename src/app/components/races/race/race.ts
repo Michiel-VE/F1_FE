@@ -39,7 +39,6 @@ export class RaceCard {
     () => this.race().startDay !== this.race().endDay,
   );
 
-  // "APR 10–12" all on one line in the date column
   readonly dateRange = computed(() => {
     const start = this.dayStart();
     const end = this.dayEnd();

@@ -1,0 +1,17 @@
+@keyframes swapUp {
+  0%   { transform: translateY(52px); opacity: 0.5; }
+  100% { transform: translateY(0);    opacity: 1;   }
+}
+
+@keyframes swapDown {
+  0%   { transform: translateY(-52px); opacity: 0.5; }
+  100% { transform: translateY(0);     opacity: 1;   }
+}
+
+.swap-up {
+  animation: swapUp 240ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.swap-down {
+  animation: swapDown 240ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
