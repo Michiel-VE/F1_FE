@@ -1,6 +1,6 @@
-
 export const environment = {
-  production: true, 
+  production: true,
   driversBaseUrl: 'https://yvcwhbkh2l.execute-api.eu-north-1.amazonaws.com/prod/api/v1',
-  googleAuthURL: ''
+  googleAuthURL:
+    'https://yvcwhbkh2l.execute-api.eu-north-1.amazonaws.com/prod/oauth2/authorization/google',
 };
