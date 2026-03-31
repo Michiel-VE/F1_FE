@@ -32,13 +32,16 @@ export class Login implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      const token = this.route.snapshot.queryParamMap.get('token');
+      const params = this.route.snapshot.queryParams;
+      const token = params['token'];
 
       if (token) {
         this.authService.setToken(token);
 
-        // Get the return URL from query params, default to drivers
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/drivers';
+        const rawReturnUrl = params['returnUrl'] || '/';
+
+        const returnUrl =
+          rawReturnUrl.startsWith('/') && !rawReturnUrl.includes(' ') ? rawReturnUrl : '/';
 
         this.router.navigateByUrl(returnUrl, {
           replaceUrl: true,
@@ -48,9 +51,8 @@ export class Login implements OnInit {
   }
 
   loginWithGoogle(): void {
-    // We append the current returnUrl to the Google Auth URL so the backend
-    // can potentially pass it back, or it stays in the browser state.
-    window.location.href = environment.googleAuthURL;
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    window.location.href = `${environment.googleAuthURL}?redirect_uri=${encodeURIComponent(returnUrl)}`;
   }
 
   onSubmit(): void {
@@ -61,9 +63,7 @@ export class Login implements OnInit {
 
     setTimeout(() => {
       this.authService.setToken('mock-jwt-token');
-
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/drivers';
-
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
       this.router.navigateByUrl(returnUrl);
       this.isLoading.set(false);
     }, 1500);
