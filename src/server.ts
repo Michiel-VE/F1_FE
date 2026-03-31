@@ -27,7 +27,7 @@ app.use(
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: [
           "'self'", 
-          "https://yvcwhbkh2l.execute-api.eu-north-1.amazonaws.com", 
+          "https://f1-api.michielve.be", 
           "http://localhost:8080"
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],

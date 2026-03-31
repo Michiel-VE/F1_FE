@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  driversBaseUrl: 'https://yvcwhbkh2l.execute-api.eu-north-1.amazonaws.com/prod/api/v1',
+  driversBaseUrl: 'https://f1-api.michielve.be/api/v1',
   googleAuthURL:
-    'https://yvcwhbkh2l.execute-api.eu-north-1.amazonaws.com/prod/oauth2/authorization/google',
+    'https://f1-api.michielve.be/oauth2/authorization/google',
 };
