@@ -1,131 +1,214 @@
-<div class="flex gap-2 sm:gap-4" [class.mb-2]="!isLast()" [class.mb-0]="isLast()">
-
-  <div class="w-10 sm:w-16 flex-shrink-0 flex flex-col items-center sm:items-start justify-start pt-7 sm:pt-8">
-    <div class="flex flex-col items-center sm:items-start leading-tight"
-      [class.text-red-400]="isCurrent()"
-      [class.text-gray-300]="isUpcoming() && !isCurrent()"
-      [class.text-gray-400]="isPast() && !dimPast()"
-      [class.text-gray-600]="isPast() && dimPast()"
-    >
-      <span class="text-[0.6rem] sm:text-[0.7rem] font-black uppercase tracking-tighter sm:tracking-wide tabular-nums">
-        {{ dateRange().split(' ')[0] }}
-      </span>
-      <span class="text-[0.65rem] sm:text-[0.7rem] font-medium tabular-nums whitespace-nowrap">
-        {{ dateRange().split(' ')[1] }}
-      </span>
-    </div>
+<div class="flex gap-3" [class.mb-0]="isLast()">
+  <!-- Date column: hidden for cancelled/postponed -->
+  <div class="w-12 flex-shrink-0 pt-7">
+    @if (showDates()) {
+      <div
+        class="flex flex-col leading-tight"
+        [class.text-red-400]="isCurrent()"
+        [class.text-gray-500]="isUpcoming() && !isCurrent()"
+        [class.text-gray-600]="isPast() && dimPast()"
+        [class.text-gray-400]="isPast() && !dimPast()"
+      >
+        <!-- Rescheduled: label the date so it's clear it's a new date -->
+        @if (showRescheduledLabel()) {
+          <span class="text-[0.5rem] font-bold tracking-widest uppercase text-blue-400 mb-0.5"
+            >New</span
+          >
+        }
+        <span class="text-[0.6rem] font-medium uppercase tracking-widest tabular-nums">
+          {{ dateRange().split(' ')[0] }}
+        </span>
+        <span class="text-[0.65rem] tabular-nums whitespace-nowrap">
+          {{ dateRange().split(' ')[1] }}
+        </span>
+      </div>
+    } @else {
+      <!-- Placeholder keeps the column width intact so layout doesn't shift -->
+      <div class="w-12"></div>
+    }
   </div>
 
-  <div class="flex flex-col items-center flex-shrink-0 pt-8">
+  <!-- Timeline dot + line -->
+  <div class="flex flex-col items-center flex-shrink-0 pt-8 w-3">
     <div class="relative flex-shrink-0">
       @if (isCurrent()) {
-        <div class="absolute rounded-full animate-ping w-3 h-3"
-             style="background: rgba(239,68,68,0.35); transform: scale(2.2);"></div>
+        <div
+          class="absolute rounded-full animate-ping w-3 h-3"
+          style="background: rgba(239, 68, 68, 0.3); transform: scale(2.2)"
+        ></div>
       }
-      <div class="w-3 h-3 rounded-full border-2 relative z-10"
+      <div
+        class="w-2.5 h-2.5 rounded-full border-2 relative z-10"
         [class.bg-red-500]="isCurrent()"
         [class.border-red-500]="isCurrent()"
-        [class.bg-white]="isUpcoming()"
-        [class.border-white]="isUpcoming()"
-        [class.bg-transparent]="isPast() && dimPast()"
-        [class.border-gray-700]="isPast() && dimPast()"
-        [class.bg-gray-400]="isPast() && !dimPast()"
-        [class.border-gray-400]="isPast() && !dimPast()"
+        [class.bg-white]="isUpcoming() && !isCurrent()"
+        [class.border-white]="isUpcoming() && !isCurrent()"
+        [class.bg-gray-700]="race().status === RaceStatus.CANCELLED"
+        [class.border-gray-700]="race().status === RaceStatus.CANCELLED"
+        [class.bg-amber-700]="
+          race().status === RaceStatus.POSTPONED || race().status === RaceStatus.DELAYED
+        "
+        [class.border-amber-700]="
+          race().status === RaceStatus.POSTPONED || race().status === RaceStatus.DELAYED
+        "
+        [class.bg-gray-600]="isPast() && dimPast() && race().status === RaceStatus.COMPLETED"
+        [class.border-gray-700]="isPast() && dimPast() && race().status === RaceStatus.COMPLETED"
+        [class.bg-gray-400]="isPast() && !dimPast() && race().status === RaceStatus.COMPLETED"
+        [class.border-gray-400]="isPast() && !dimPast() && race().status === RaceStatus.COMPLETED"
       ></div>
     </div>
     @if (!isLast()) {
-      <div class="w-px flex-1 mt-1"
+      <div
+        class="w-px flex-1 mt-1"
         [class.bg-white/20]="!isPast()"
-        [class.bg-white/[0.06]]="isPast() && dimPast()"
-        [class.bg-white/20]="isPast() && !dimPast()"
+        [class.bg-white/[0.05]]="isPast() && dimPast()"
+        [class.bg-white/15]="isPast() && !dimPast()"
       ></div>
     }
   </div>
 
+  <!-- Card -->
   <div
-    class="flex-1 min-w-0 mb-3 rounded-xl border transition-all duration-200"
+    class="flex-1 min-w-0 mb-2.5 rounded-xl border transition-all duration-200"
     [class.bg-red-950/20]="isCurrent()"
     [class.border-red-600/50]="isCurrent()"
-    [class.shadow-lg]="isCurrent()"
-    [class.shadow-red-950/50]="isCurrent()"
     [class.bg-white/[0.03]]="!isCurrent()"
     [class.border-white/[0.07]]="isUpcoming()"
     [class.hover:border-white/20]="isUpcoming()"
     [class.border-white/[0.04]]="isPast() && dimPast()"
     [class.border-white/[0.07]]="isPast() && !dimPast()"
-    [class.opacity-35]="isPast() && dimPast()"
-    [class.hover:opacity-90]="isPast() && dimPast()"
+    [class.opacity-40]="isPast() && dimPast()"
+    [class.hover:opacity-80]="isPast() && dimPast()"
+    [class.opacity-50]="race().status === RaceStatus.CANCELLED"
+    [class.border-red-900/30]="race().status === RaceStatus.CANCELLED"
   >
-    <div class="px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
-
+    <div class="px-3 sm:px-4 py-3 flex items-start justify-between gap-2">
       <div class="flex flex-col gap-0.5 min-w-0">
+        <!-- Round label + live badge -->
         <div class="flex items-center gap-2">
           @if (isRound()) {
-            <span class="text-[0.6rem] font-semibold tracking-[0.15em] uppercase"
+            <span
+              class="text-[0.6rem] font-semibold tracking-[0.15em] uppercase"
               [class.text-red-400]="isCurrent()"
               [class.text-gray-500]="!isCurrent()"
-            >Round {{ roundNumber() }}</span>
+              >Round {{ roundNumber() }}</span
+            >
           } @else {
-            <span class="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-gray-600">
-              Pre
-            </span>
+            <span class="text-[0.6rem] font-semibold tracking-[0.15em] uppercase text-gray-600"
+              >Pre-Season</span
+            >
           }
           @if (isCurrent()) {
-            <span class="inline-flex items-center gap-1 text-[0.55rem] font-bold tracking-wider uppercase
-                         bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-1.5 py-0.5">
-              <span class="w-1 h-1 rounded-full bg-red-500 animate-pulse"></span>
+            <span
+              class="inline-flex items-center gap-1 text-[0.55rem] font-bold tracking-wider uppercase bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-1.5 py-0.5"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
               Live
             </span>
           }
         </div>
 
-        <p class="text-sm font-bold leading-tight truncate"
+        <!-- Race name: strikethrough for cancelled -->
+        <p
+          class="text-sm font-bold leading-tight truncate transition-all"
           [class.text-white]="!isPast() || !dimPast()"
           [class.text-gray-400]="isPast() && dimPast()"
-        >{{ raceName() }}</p>
+          [class.line-through]="strikethrough()"
+          [class.text-gray-600]="strikethrough()"
+          [class.decoration-red-900]="strikethrough()"
+        >
+          {{ raceName() }}
+        </p>
 
+        <!-- Country -->
         <div class="flex items-center gap-1 mt-0.5">
-          <svg class="w-3 h-3 flex-shrink-0"
+          <svg
+            class="w-3 h-3 flex-shrink-0"
             [class.text-red-400]="isCurrent()"
             [class.text-gray-500]="!isCurrent()"
-            viewBox="0 0 16 16" fill="none">
-            <path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5S12.5 9.5 12.5 6c0-2.5-2-4.5-4.5-4.5z"
-              stroke="currentColor" stroke-width="1.5"/>
-            <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.5"/>
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path
+              d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5S12.5 9.5 12.5 6c0-2.5-2-4.5-4.5-4.5z"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.5" />
           </svg>
-          <span class="text-[0.7rem] truncate"
-            [class.text-gray-400]="!isCurrent()"
+          <span
+            class="text-[0.7rem] truncate"
             [class.text-red-300]="isCurrent()"
-          >{{ race().country }}</span>
+            [class.text-gray-400]="!isCurrent()"
+            >{{ race().country }}</span
+          >
         </div>
       </div>
 
-      <div class="flex-shrink-0">
-        @if (isCurrent()) {
-          <span class="text-[0.6rem] sm:text-xs font-bold text-red-400 border border-red-600/40 bg-red-900/30 rounded-lg px-2 py-1 whitespace-nowrap">
-            On Now
-          </span>
-        } @else if (isUpcoming()) {
-          <span class="text-[0.6rem] sm:text-xs font-semibold text-gray-300 border border-white/10 bg-white/[0.04] rounded-lg px-2 py-1 whitespace-nowrap">
-            {{ statusLabel() }}
+      <!-- Badge -->
+      <div class="flex-shrink-0 pt-0.5">
+        @if (badge(); as b) {
+          <span
+            class="text-[0.6rem] sm:text-xs font-bold border rounded-lg px-2 py-1 whitespace-nowrap"
+            [class]="b.class"
+          >
+            {{ b.label }}
           </span>
         }
       </div>
-
     </div>
 
+    <!-- Footer row: live date range, extraInfo, or status fallback text -->
     @if (isCurrent()) {
-      <div class="px-4 pb-3 border-t border-red-600/20 pt-2.5 flex items-center gap-3">
-        <svg class="w-3.5 h-3.5 text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none">
-          <rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M1 6h14M5 1v2M11 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <div class="px-3 sm:px-4 pb-3 border-t border-red-600/20 pt-2.5 flex items-center gap-2">
+        <svg class="w-3 h-3 text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none">
+          <rect
+            x="1"
+            y="2"
+            width="14"
+            height="12"
+            rx="2"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="M1 6h14M5 1v2M11 1v2"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
         <span class="text-[0.7rem] text-red-300">
-          {{ startDate() | date:'d MMM' }} – {{ endDate() | date:'d MMM yyyy' }}
+          {{ startDate() | date: 'd MMM' }} – {{ endDate() | date: 'd MMM yyyy' }}
         </span>
       </div>
+    } @else if (race().extraInfo) {
+      <div class="px-3 sm:px-4 pb-3 border-t border-white/[0.06] pt-2.5 flex items-center gap-2">
+        <svg class="w-3 h-3 text-gray-500 flex-shrink-0" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" />
+          <path
+            d="M8 5v3.5M8 11v1"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span class="text-[0.7rem] text-gray-400">{{ race().extraInfo }}</span>
+      </div>
+    } @else if (statusFallbackText()) {
+      <!-- Shown when cancelled/postponed and no extraInfo is available -->
+      <div class="px-3 sm:px-4 pb-3 border-t border-white/[0.04] pt-2.5 flex items-center gap-2">
+        <svg class="w-3 h-3 text-gray-600 flex-shrink-0" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" />
+          <path
+            d="M8 5v3.5M8 11v1"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span class="text-[0.7rem] text-gray-600 italic">{{ statusFallbackText() }}</span>
+      </div>
     }
-
   </div>
-
 </div>

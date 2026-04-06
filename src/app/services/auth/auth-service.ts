@@ -1,47 +1,70 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { jwtDecode } from 'jwt-decode';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { User } from '../../interfaces/user';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private platformId = inject(PLATFORM_ID);
-  readonly isAuthenticated = computed(() => !!this._token());
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly http = inject(HttpClient);
 
-  private readonly _token = signal<string | null>(
-    isPlatformBrowser(this.platformId) ? localStorage.getItem('auth_token') : null,
-  );
+  private readonly _isAuthenticated = signal<boolean | null>(null);
+  private readonly _currentUser = signal<User | null>(null);
 
-  setToken(token: string): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('auth_token', token);
+  readonly isAuthenticated = computed(() => this._isAuthenticated() === true);
+  readonly authChecked = computed(() => this._isAuthenticated() !== null);
+  readonly currentUser = this._currentUser.asReadonly();
+
+  checkAuth(): Observable<boolean> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of(false);
     }
-    this._token.set(token);
+
+    return this.http.get<User>(`${environment.baseUrl}/profile`, { withCredentials: true }).pipe(
+      map((user) => {
+        this._currentUser.set(user);
+        return true;
+      }),
+      catchError(() => of(false)),
+      tap((isAuth) => this._isAuthenticated.set(isAuth)),
+    );
   }
 
-  logout(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('auth_token');
-    }
-    this._token.set(null);
+  loginWithCredentials(email: string, password: string): Observable<void> {
+    return this.http
+      .post<void>(
+        `${environment.baseUrl}/auth/login`,
+        { email, password },
+        { withCredentials: true },
+      )
+      .pipe(
+        switchMap(() => this.checkAuth()),
+        map(() => void 0),
+      );
   }
 
-  getToken(): string | null {
-    return this._token();
+  logout(): Observable<void> {
+    return this.http
+      .post<void>(`${environment.baseUrl}/auth/logout`, {}, { withCredentials: true })
+      .pipe(
+        tap(() => {
+          this._isAuthenticated.set(false);
+          this._currentUser.set(null);
+        }),
+        catchError(() => {
+          this._isAuthenticated.set(false);
+          this._currentUser.set(null);
+          return of(void 0);
+        }),
+      );
   }
 
-  isTokenExpiringSoon(): boolean {
-    const token = this._token();
-    if (!token) return false;
-
-    try {
-      const decoded: any = jwtDecode(token);
-      const currentTime = Math.floor(Date.now() / 1000);
-
-      return decoded.exp - currentTime < 300;
-    } catch (e) {
-      return true;
-    }
+  setAuthenticated(): void {
+    this._isAuthenticated.set(true);
   }
 }

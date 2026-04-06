@@ -11,16 +11,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DriverService } from '../../services/driver/driver-service';
 import { Driver as DriverI } from '../../interfaces/driver';
 import { ErrorState } from '../../interfaces/error-state';
-import { AgePipe } from '../../pipe/age/age-pipe';
 import { finalize } from 'rxjs/operators';
-import { TeamInfo } from '../../interfaces/team-info';
 import { Header } from '../common/header/header';
 import { Driver } from './driver/driver';
+import { Error as ErrorComponent } from '../common/error/error';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-drivers',
   standalone: true,
-  imports: [CommonModule, Header, Driver],
+  imports: [CommonModule, Header, Driver, ErrorComponent],
   templateUrl: './drivers.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -51,26 +51,21 @@ export class Drivers implements OnInit {
     this.error.set(null);
 
     this.driverService
-      .getData<DriverI[]>(
-        `${this.CACHE_KEY_PREFIX}${this.selectedYear()}`,
-        this.selectedYear()
-      )
+      .getData<DriverI[]>(`${this.CACHE_KEY_PREFIX}${this.selectedYear()}`, this.selectedYear())
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.isLoading.set(false)),
       )
       .subscribe({
         next: (data) => {
           this.drivers.set(data || []);
         },
         error: (err) => {
-          const errorState: ErrorState = {
-            message: this.extractErrorMessage(err),
+          this.error.set({
+            message: this.extractErrorMessage(err, 'Error fetching drivers'),
             timestamp: new Date(),
             canRetry: true,
-          };
-          this.error.set(errorState);
-          console.error('Error fetching drivers:', err);
+          });
         },
       });
   }
@@ -79,13 +74,9 @@ export class Drivers implements OnInit {
     this.fetchDrivers();
   }
 
-  private extractErrorMessage(err: Error): string {
-    if (typeof err === 'string') {
-      return err;
-    }
-    if (err?.message) {
-      return err.message;
-    }
-    return 'Failed to fetch drivers data. Please try again.';
+  private extractErrorMessage(err: HttpErrorResponse, title: string): string {
+    if (typeof err === 'string') return `${title}: ${err}`;
+    if (err?.message) return `${title}: ${err.status} ${err.statusText}`;
+    return `${title} data. Please try again.`;
   }
 }

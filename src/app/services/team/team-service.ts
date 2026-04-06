@@ -21,7 +21,7 @@ export class TeamService {
   private getCurrentYear = (): string => new Date().getFullYear().toString();
 
   private buildUrl(year: string): string {
-    return `${environment.driversBaseUrl}/teams/${year}`;
+    return `${environment.baseUrl}/teams/${year}`;
   }
 
   private isDataReloadNecessary(lastReloadTimestamp: number): boolean {

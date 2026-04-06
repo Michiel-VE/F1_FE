@@ -11,7 +11,7 @@ export class PredictionService {
   private http = inject(HttpClient);
   private teamService = inject(TeamService);
 
-  private readonly PREDICTION_URL = `${environment.driversBaseUrl}/predictions/team`;
+  private readonly PREDICTION_URL = `${environment.baseUrl}/predictions/team`;
 
   getTeamsForPrediction<T>(): Observable<T> {
     const currentYear = new Date().getFullYear().toString();

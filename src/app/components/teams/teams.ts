@@ -6,7 +6,7 @@ import {
   DestroyRef,
   signal,
 } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TeamService } from '../../services/team/team-service';
 import { Team } from '../../interfaces/team';
@@ -14,20 +14,19 @@ import { ErrorState } from '../../interfaces/error-state';
 import { finalize } from 'rxjs/operators';
 import { TeamCard } from './team/team';
 import { Header } from '../common/header/header';
+import { Error as ErrorComponent } from '../common/error/error';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-teams',
   standalone: true,
-  imports: [TeamCard, Header],
+  imports: [CommonModule, TeamCard, Header, ErrorComponent],
   templateUrl: './teams.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Teams implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly destroyRef = inject(DestroyRef);
-
-  private readonly CACHE_KEY = 'f1_teams_2026';
-  private readonly YEAR = '2026';
 
   readonly teams = signal<Team[]>([]);
   readonly isLoading = signal(false);
@@ -66,18 +65,17 @@ export class Teams implements OnInit {
         next: (data) => this.teams.set(data || []),
         error: (err) => {
           this.error.set({
-            message: this.extractErrorMessage(err),
+            message: this.extractErrorMessage(err, 'Error fetching teams'),
             timestamp: new Date(),
             canRetry: true,
           });
-          console.error('[Teams] Error fetching teams:', err);
         },
       });
   }
 
-  private extractErrorMessage(err: Error): string {
-    if (typeof err === 'string') return err;
-    if (err?.message) return err.message;
-    return 'Failed to fetch teams. Please try again.';
+  private extractErrorMessage(err: HttpErrorResponse, title: string): string {
+    if (typeof err === 'string') return `${title}: ${err}`;
+    if (err?.message) return `${title}: ${err.status} ${err.statusText}`;
+    return `${title} data. Please try again.`;
   }
 }

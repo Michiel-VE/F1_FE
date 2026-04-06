@@ -18,7 +18,7 @@ export class RaceService {
   private getCurrentYear = (): string => new Date().getFullYear().toString();
 
   private buildUrl(year: string): string {
-    return `${environment.driversBaseUrl}/races/${year}`;
+    return `${environment.baseUrl}/races/${year}`;
   }
 
   private isCacheExpired(lastReloadTimestamp: number): boolean {

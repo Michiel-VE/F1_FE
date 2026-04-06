@@ -17,7 +17,7 @@
     <div class="bg-zinc-900/50 border border-white/5 p-8 backdrop-blur-sm">
       <button
         (click)="loginWithGoogle()"
-        class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 transition-all duration-300 uppercase text-xs tracking-widest mb-6"
+        class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-300 cursor-pointer text-black font-bold py-3 px-4 transition-all duration-300 uppercase text-xs tracking-widest mb-6"
       >
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -84,7 +84,7 @@
         <button
           type="submit"
           [disabled]="isLoading()"
-          class="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black py-4 px-4 transition-all duration-300 uppercase text-xs tracking-[0.2em] italic"
+          class="w-full bg-red-600 hover:bg-red-700 cursor-pointer text-white font-black py-4 px-4 transition-all duration-300 uppercase text-xs tracking-[0.2em] italic"
         >
           {{ isLoading() ? 'Loading...' : 'Login' }}
         </button>
