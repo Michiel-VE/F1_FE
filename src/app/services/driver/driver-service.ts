@@ -13,7 +13,7 @@ export class DriverService {
   private http = inject(HttpClient);
   private cacheService = inject(CacheService);
 
-  private ENDPOINT_URL = environment.driversBaseUrl + '/drivers';
+  private ENDPOINT_URL = environment.baseUrl + '/drivers';
 
   private DAYLIST: Record<string, number> = {
     Sunday: 0,
@@ -65,7 +65,7 @@ export class DriverService {
   private fetchAndCacheData<T>(key: string, year: string): Observable<T> {
     this.ENDPOINT_URL =
       year != this.getCurrentYear()
-        ? `${environment.driversBaseUrl}/drivers/${year}`
+        ? `${environment.baseUrl}/drivers/${year}`
         : this.ENDPOINT_URL;
     console.log(
       `[DriverService] Fetching data for key ${key} from API., year: ${year}, endpoint: ${this.ENDPOINT_URL}`,

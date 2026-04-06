@@ -18,25 +18,14 @@ interface Endpoint {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingPage {
-  // Using signals for optimized fine-grained reactivity
   readonly currentYear = signal(new Date().getFullYear());
 
   readonly endpoints = signal<Endpoint[]>([
     {
       title: `Season ${this.currentYear()} F1 Drivers`,
-      desc: 'Get a full list of every Formula 1 driver — past and present.',
+      desc: 'Get a full list of every Formula 1 driver for the current season.',
       btn: `View ${this.currentYear()} Drivers`,
       linkTo: '/drivers',
-    },
-    {
-      title: 'Drivers by Season',
-      desc: 'Discover which drivers raced in any specific F1 season.',
-      btn: 'Select Season',
-    },
-    {
-      title: 'Driver by Number',
-      desc: 'Find detailed information about a driver using their permanent number.',
-      btn: 'Search Driver',
     },
     {
       title: 'Career History',

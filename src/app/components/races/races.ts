@@ -16,11 +16,14 @@ import { Race } from '../../interfaces/race';
 import { ErrorState } from '../../interfaces/error-state';
 import { RaceCard } from './race/race';
 import { Header } from '../common/header/header';
+import { Error as ErrorComponent } from '../common/error/error';
+import { HttpErrorResponse } from '@angular/common/http';
+import { RaceStatus } from '../../enum/race-status';
 
 @Component({
   selector: 'app-races',
   standalone: true,
-  imports: [CommonModule, RaceCard, Header],
+  imports: [CommonModule, RaceCard, Header, ErrorComponent],
   templateUrl: './races.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
@@ -68,13 +71,18 @@ export class Races implements OnInit {
   });
 
   readonly nextUpRace = computed(
-    () => this.races().find((r) => this.isUpcoming(r) || this.isCurrentRace(r)) ?? null,
+    () =>
+      this.races().find(
+        (r) =>
+          (this.isUpcoming(r) || this.isCurrentRace(r)) &&
+          r.status !== RaceStatus.CANCELLED &&
+          r.status !== RaceStatus.POSTPONED,
+      ) ?? null,
   );
 
   readonly pastRaces = computed(() => this.races().filter((r) => this.isPast(r)));
   readonly pastCount = computed(() => this.pastRaces().length);
 
-  /** Last 1 past races shown as hint when collapsed */
   readonly hintRaces = computed(() => this.pastRaces().slice(-1));
 
   readonly visibleRaces = computed(() => {
@@ -84,13 +92,11 @@ export class Races implements OnInit {
     return [...this.hintRaces(), ...upcoming];
   });
 
-  /** How many past races are hidden (total past minus the 1 hint) */
   readonly hiddenPastCount = computed(() => {
     if (!this.isCurrentYear() || this.pastExpanded()) return 0;
     return Math.max(0, this.pastCount() - 1);
   });
 
-  /** The id of the last hint race — button renders right after this one */
   readonly lastHintRaceId = computed(() => {
     const hints = this.hintRaces();
     return hints.length > 0 ? hints[hints.length - 1].id : null;
@@ -148,18 +154,17 @@ export class Races implements OnInit {
         next: (data) => this.races.set(data || []),
         error: (err) => {
           this.error.set({
-            message: this.extractErrorMessage(err),
+            message: this.extractErrorMessage(err, 'Error fetching races'),
             timestamp: new Date(),
             canRetry: true,
           });
-          console.error('[Races] Error fetching races:', err);
         },
       });
   }
 
-  private extractErrorMessage(err: Error): string {
-    if (typeof err === 'string') return err;
-    if (err?.message) return err.message;
-    return 'Failed to fetch races. Please try again.';
+  private extractErrorMessage(err: HttpErrorResponse, title: string): string {
+    if (typeof err === 'string') return `${title}: ${err}`;
+    if (err?.message) return `${title}: ${err.status} ${err.statusText}`;
+    return `${title} data. Please try again.`;
   }
 }

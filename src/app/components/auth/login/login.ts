@@ -33,20 +33,16 @@ export class Login implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       const params = this.route.snapshot.queryParams;
-      const token = params['token'];
+      const rawReturnUrl = params['returnUrl'] || '/';
+      const returnUrl =
+        rawReturnUrl.match(/^\/[^/].*/) || rawReturnUrl === '/' ? rawReturnUrl : '/';
 
-      if (token) {
-        this.authService.setToken(token);
-
-        const rawReturnUrl = params['returnUrl'] || '/';
-
-        const returnUrl =
-          rawReturnUrl.startsWith('/') && !rawReturnUrl.includes(' ') ? rawReturnUrl : '/';
-
-        this.router.navigateByUrl(returnUrl, {
-          replaceUrl: true,
-        });
-      }
+      // After OAuth redirect the cookie is already set — check and redirect
+      this.authService.checkAuth().subscribe((loggedIn) => {
+        if (loggedIn) {
+          this.router.navigateByUrl(returnUrl, { replaceUrl: true });
+        }
+      });
     }
   }
 
@@ -61,11 +57,23 @@ export class Login implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    setTimeout(() => {
-      this.authService.setToken('mock-jwt-token');
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-      this.router.navigateByUrl(returnUrl);
-      this.isLoading.set(false);
-    }, 1500);
+    const rawReturnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    const returnUrl =
+      rawReturnUrl.match(/^\/[^/].*/) || rawReturnUrl === '/' ? rawReturnUrl : '/';
+
+    this.authService.loginWithCredentials(this.email(), this.password()).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigateByUrl(returnUrl, { replaceUrl: true });
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(
+          err.status === 401
+            ? 'Invalid email or password.'
+            : 'Login failed. Please try again.',
+        );
+      },
+    });
   }
 }
