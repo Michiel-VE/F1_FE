@@ -1,2 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+.modal-backdrop {
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

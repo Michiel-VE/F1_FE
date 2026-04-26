@@ -7,7 +7,7 @@ import { CacheEntry } from '../../interfaces/cache-entry';
 @Injectable({
   providedIn: 'root',
 })
-export class CacheService {
+export class PersistentCacheService  {
   private platformId = inject(PLATFORM_ID);
   private isBrowser: boolean;
 

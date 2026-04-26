@@ -104,6 +104,23 @@
           <span class="text-[0.65rem] text-gray-300">({{ driver().birthday | age }} yrs)</span>
         </span>
       </div>
+
+      <div
+        (click)="openStats()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="openStats()"
+        (keydown.space)="openStats()"
+        class="mt-3 items-center text-[0.65rem] font-semibold tracking-[0.1em] uppercase cursor-pointer bg-white/[0.05] border inline-flex border-white/[0.07] rounded-md p-2"
+      >
+        <span
+          [class.text-yellow-400]="position() === 1"
+          [class.text-slate-300]="position() === 2"
+          [class.text-orange-400]="position() === 3"
+          [class.text-red-500]="position() > 3"
+          >View race stats</span
+        >
+      </div>
     </div>
   </div>
 </article>
