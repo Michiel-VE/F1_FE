@@ -12,6 +12,8 @@ import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@an
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { AuthService } from './services/auth/auth-service';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { OverlayModule } from '@angular/cdk/overlay';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,9 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
     provideAnimations(),
-    provideAppInitializer(() => {
-      const authService = inject(AuthService);
-      return authService.checkAuth();
-    }),
+    provideCharts(withDefaultRegisterables()),
+    OverlayModule
   ],
 };

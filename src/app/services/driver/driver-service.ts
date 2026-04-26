@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { CacheEntry } from '../../interfaces/cache-entry';
-import { CacheService } from '../cache/cache-service';
+import { PersistentCacheService  } from '../cache/cache-service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -11,7 +11,7 @@ import { environment } from '../../../environments/environment';
 })
 export class DriverService {
   private http = inject(HttpClient);
-  private cacheService = inject(CacheService);
+  private cacheService = inject(PersistentCacheService );
 
   private ENDPOINT_URL = environment.baseUrl + '/drivers';
 
