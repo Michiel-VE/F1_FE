@@ -12,6 +12,7 @@
         </span>
       </a>
 
+      <!-- Desktop Links System -->
       <ul class="hidden md:flex items-center space-x-1 h-full">
         @for (link of visibleLinks(); track link.name) {
           <li class="relative flex items-center h-full">
@@ -71,6 +72,7 @@
           </li>
         }
 
+        <!-- Profile Menu Section -->
         @if (isUserAuth()) {
           <li class="relative flex items-center h-full pl-3">
             <button
@@ -154,6 +156,7 @@
         }
       </ul>
 
+      <!-- Mobile Toggle Button -->
       <button
         class="md:hidden group relative w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:text-white transition-colors"
         (click)="toggleMenu()"
@@ -176,6 +179,7 @@
     </div>
   </div>
 
+  <!-- Mobile Dropdown Menu -->
   @if (isMenuOpen()) {
     <div
       class="md:hidden bg-black/95 border-t border-white/5 px-8 py-10 max-h-[calc(100vh-5rem)] overflow-y-auto"

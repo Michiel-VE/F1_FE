@@ -2,24 +2,47 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TeamService } from '../team/team-service';
-import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class PredictionService {
   private http = inject(HttpClient);
   private teamService = inject(TeamService);
+  
+  private apiPredictionsUrl = '/api/v1/predictions';
 
-  private readonly PREDICTION_URL = `${environment.baseUrl}/predictions/team`;
-
-  getTeamsForPrediction<T>(): Observable<T> {
-    const currentYear = new Date().getFullYear().toString();
-     const cacheKey = `f1_teams_${currentYear}`;
-    return this.teamService.getData<T>(cacheKey, currentYear);
+  getPredictionStatus(): Observable<{ hasPools: boolean; hasPersonalPrediction: boolean }> {
+    return this.http.get<{ hasPools: boolean; hasPersonalPrediction: boolean }>(`${this.apiPredictionsUrl}/status`);
   }
 
-  postTeamPrediction<T>(predictionData: any): Observable<T> {
-    return this.http.post<T>(this.PREDICTION_URL, predictionData);
+  getTeamsForPrediction<T>(): Observable<T> {
+    const currentSeason = new Date().getFullYear().toString();
+    return this.teamService.getData<T>('f1_teams_cache', currentSeason);
+  }
+
+  getUserPools(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiPredictionsUrl}/pools`);
+  }
+
+  getSavedPrediction(poolId: string | null): Observable<any> {
+    if (!poolId) {
+      // Maps directly to @GetMapping("/team/personal")
+      return this.http.get<any>(`${this.apiPredictionsUrl}/team/personal`);
+    }
+    // Maps directly to @GetMapping("/team/pool/{poolId}")
+    return this.http.get<any>(`${this.apiPredictionsUrl}/team/pool/${poolId}`);
+  }
+
+  createPool(name: string): Observable<any> {
+    return this.http.post(`${this.apiPredictionsUrl}/pools`, { name });
+  }
+
+  joinPool(inviteCode: string): Observable<any> {
+    return this.http.post(`${this.apiPredictionsUrl}/pools/join`, { inviteCode });
+  }
+
+  postTeamPrediction(payload: { poolId: string | null; predictedTeams: string[] }): Observable<any> {
+    return this.http.post(`${this.apiPredictionsUrl}/team`, payload);
   }
 }

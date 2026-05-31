@@ -51,20 +51,12 @@ export class Navbar {
       .toUpperCase();
   });
 
-  // Profile link removed — handled by avatar popover
   private readonly allLinks = signal<NavLink[]>([
     { name: 'Drivers', path: '/drivers' },
     { name: 'Teams', path: '/teams' },
     { name: 'Races', path: '/races' },
     { name: 'Login', path: '/login', hideIfAuth: true },
-    {
-      name: 'Predictions',
-      requiresAuth: true,
-      children: [
-        { name: 'Race Prediction', path: '/prediction/race' },
-        { name: 'Constructor Prediction', path: '/prediction/constructor' },
-      ],
-    },
+    { name: 'Predictions', path: '/prediction', requiresAuth: true }
   ]);
 
   readonly visibleLinks = computed(() => {
