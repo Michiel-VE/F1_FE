@@ -6,9 +6,14 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import helmet from 'helmet';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
-const browserDistFolder = join(import.meta.dirname, '../browser');
+/**
+ * Resolve the browser directory robustly for hosted environments
+ */
+const browserDistFolder = process.env['BROWSER_DIST_FOLDER'] 
+  ? resolve(process.env['BROWSER_DIST_FOLDER'])
+  : join(import.meta.dirname, '../browser');
 
 const app = express();
 
@@ -21,7 +26,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'none'"], 
+        scriptSrcAttr: ["'self'", "'unsafe-hashes'", "'unsafe-inline'"], 
         styleSrc: ["'self'", "'unsafe-inline'"],
         styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https:"],
@@ -45,7 +50,7 @@ const angularApp = new AngularNodeAppEngine();
  * Example:
  * ```ts
  * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
+ * // Handle API request
  * });
  * ```
  */
