@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TeamService } from '../team/team-service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class PredictionService {
   private http = inject(HttpClient);
   private teamService = inject(TeamService);
   
-  private apiPredictionsUrl = '/api/v1/predictions';
+  private apiPredictionsUrl = `${environment.baseUrl}/predictions`;
 
   getPredictionStatus(): Observable<{ hasPools: boolean; hasPersonalPrediction: boolean }> {
     return this.http.get<{ hasPools: boolean; hasPersonalPrediction: boolean }>(`${this.apiPredictionsUrl}/status`);
@@ -27,10 +28,8 @@ export class PredictionService {
 
   getSavedPrediction(poolId: string | null): Observable<any> {
     if (!poolId) {
-      // Maps directly to @GetMapping("/team/personal")
       return this.http.get<any>(`${this.apiPredictionsUrl}/team/personal`);
     }
-    // Maps directly to @GetMapping("/team/pool/{poolId}")
     return this.http.get<any>(`${this.apiPredictionsUrl}/team/pool/${poolId}`);
   }
 
