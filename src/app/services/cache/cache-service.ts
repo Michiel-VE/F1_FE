@@ -1,49 +1,48 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import localForage from 'localforage';
-import { from, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { CacheEntry } from '../../interfaces/cache-entry';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PersistentCacheService  {
+export class PersistentCacheService {
   private platformId = inject(PLATFORM_ID);
   private isBrowser: boolean;
+  private readonly STORE_PREFIX = 'F1AppCache_';
 
   constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
-    
-    if (this.isBrowser) {
-      localForage.config({
-        name: 'F1AppCache',
-        storeName: 'drivers_current_year',
-      });
-    } else {
+    if (!this.isBrowser) {
       console.warn('[CacheService] Running in non-browser environment (SSR/Node). Caching disabled.');
     }
   }
 
   getItem<T>(key: string): Observable<CacheEntry<T> | null> {
-    if (!this.isBrowser) {
-        return of(null);
+    if (!this.isBrowser) return of(null);
+    try {
+      const raw = localStorage.getItem(this.STORE_PREFIX + key);
+      return of(raw ? JSON.parse(raw) as CacheEntry<T> : null);
+    } catch {
+      return of(null);
     }
-    return from(localForage.getItem<CacheEntry<T>>(key));
   }
 
   setItem<T>(key: string, entry: CacheEntry<T>): Promise<T> {
-    if (!this.isBrowser) {
-        return Promise.resolve(entry.data);
+    if (!this.isBrowser) return Promise.resolve(entry.data);
+    try {
+      localStorage.setItem(this.STORE_PREFIX + key, JSON.stringify(entry));
+    } catch (e) {
+      console.error('[CacheService] Failed to save to localStorage:', e);
     }
-    
-    return localForage.setItem(key, entry)
-      .then(() => entry.data);
+    return Promise.resolve(entry.data);
   }
 
   clear(): Promise<void> {
-    if (!this.isBrowser) {
-        return Promise.resolve();
-    }
-    return localForage.clear();
+    if (!this.isBrowser) return Promise.resolve();
+    Object.keys(localStorage)
+      .filter(k => k.startsWith(this.STORE_PREFIX))
+      .forEach(k => localStorage.removeItem(k));
+    return Promise.resolve();
   }
 }
