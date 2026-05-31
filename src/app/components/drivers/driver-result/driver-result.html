@@ -1,9 +1,17 @@
 <app-modal-shell>
-  <div class="flex h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
+  <div class="flex flex-col-reverse sm:flex-row h-[92vh] sm:h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30">
+
     <aside
-      class="w-24 bg-slate-900 border-r border-slate-800 flex flex-col items-center py-10 gap-6"
+      class="
+        flex flex-row items-center gap-3 px-4 py-3 overflow-x-auto
+        border-t border-slate-800 bg-slate-900
+        sm:flex-col sm:w-24 sm:border-r sm:border-t-0 sm:py-10 sm:px-0 sm:gap-6 sm:overflow-x-visible sm:overflow-y-auto
+        shrink-0
+      "
     >
-      <div class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-4">Season</div>
+      <div class="text-[10px] font-black text-slate-600 uppercase tracking-widest shrink-0 sm:mb-4">
+        Season
+      </div>
 
       @for (year of years(); track year) {
         <button
@@ -13,27 +21,28 @@
               ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 ring-2 ring-blue-400/20'
               : 'bg-slate-800 text-slate-500 hover:text-slate-300 hover:bg-slate-700'
           "
-          class="w-14 h-14 rounded-2xl font-bold transition-all duration-300 active:scale-90 flex items-center justify-center"
+          class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-bold text-sm transition-all duration-300 active:scale-90 flex items-center justify-center shrink-0"
         >
           {{ year }}
         </button>
       }
     </aside>
 
-    <main class="flex-1 p-10 flex flex-col overflow-hidden">
-      <header class="flex justify-between items-end mb-10">
+    <main class="flex-1 p-4 sm:p-10 flex flex-col overflow-hidden min-h-0 relative">
+
+      <header class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-end mb-5 sm:mb-10 shrink-0">
         <div>
-          <h2 class="text-blue-500 font-mono text-xs tracking-[0.3em] uppercase mb-2">
+          <h2 class="text-blue-500 font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-1 sm:mb-2">
             Driver Performance Metric
           </h2>
-          <h1 class="text-6xl font-black italic uppercase tracking-tighter leading-none">
+          <h1 class="text-3xl sm:text-6xl font-black italic uppercase tracking-tighter leading-none">
             {{ selectedYear() }}
             <span class="text-slate-800 not-italic font-light">GP Results</span>
           </h1>
         </div>
 
-        <div class="text-right">
-          @if (selectedYear() === '2026') {
+        <div class="sm:text-right">
+          @if (selectedYear() === CURRENT_YEAR) {
             <span
               class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold uppercase tracking-widest border border-emerald-500/20"
             >
@@ -44,14 +53,19 @@
         </div>
       </header>
 
-      @if (rawResults().length === 0) {
-        <div class="flex-1 flex flex-col items-center justify-center gap-6 text-center">
+      <div class="flex-1 relative min-h-0 w-full">
+        
+        <div
+          class="absolute inset-0 flex flex-col items-center justify-center gap-6 text-center transition-all duration-300 z-20"
+          [class.opacity-0]="rawResults().length > 0"
+          [class.pointer-events-none]="rawResults().length > 0"
+        >
           <div class="flex flex-col items-center gap-1.5">
             <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-700">
               {{ selectedYear() }} Season
             </span>
             <p
-              class="text-[2.5rem] font-black italic uppercase tracking-tighter leading-none text-slate-800"
+              class="text-3xl sm:text-[2.5rem] font-black italic uppercase tracking-tighter leading-none text-slate-800"
             >
               No Entry
             </p>
@@ -65,20 +79,24 @@
             did not race this season
           </p>
         </div>
-      } @else {
+
         <div
-          class="flex-1 bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-8 relative shadow-inner overflow-hidden"
+          class="w-full h-full bg-slate-900/40 border border-slate-800 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 relative shadow-inner overflow-hidden transition-all duration-300 z-10"
+          [class.opacity-0]="rawResults().length === 0"
+          [class.pointer-events-none]="rawResults().length === 0"
         >
           <div
             class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600/5 blur-[120px] rounded-full pointer-events-none"
           ></div>
 
-          <div class="h-full w-full relative z-10">
-            <canvas baseChart [data]="chartData()" [options]="chartOptions" [type]="'line'">
+          <div class="h-full w-full relative">
+            <canvas baseChart [data]="chartData()" [options]="chartOptions()" [type]="'line'">
             </canvas>
           </div>
         </div>
-      }
+
+      </div>
+
     </main>
   </div>
 </app-modal-shell>

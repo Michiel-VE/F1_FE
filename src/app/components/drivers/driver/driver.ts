@@ -16,6 +16,7 @@ import { DriverResult } from '../driver-result/driver-result';
 export class Driver {
   driver = input.required<DriverI>();
   position = input<number>(0);
+  searchedYear = input<string>(new Date().getFullYear().toString()); // ← add this
 
   private modalService = inject(ModalService);
 
@@ -36,6 +37,9 @@ export class Driver {
   }
 
   openStats(): void {
-    this.modalService.open(DriverResult, { driver: this.driver() });
+    this.modalService.open(DriverResult, {
+      driver: this.driver(),
+      selectedYear: this.searchedYear(),
+    });
   }
 }

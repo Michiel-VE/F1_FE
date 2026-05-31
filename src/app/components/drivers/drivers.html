@@ -7,7 +7,7 @@
 
 <app-error [error]="error()" (retry)="retryFetch()" />
 
-<section class="mx-4 sm:mx-12 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<section class="mx-4 sm:mx-12 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[400px]">
   @if (isLoading()) {
     @for (i of [1, 2, 3, 4, 5, 6]; track i) {
       <div
@@ -35,10 +35,10 @@
     }
   } @else {
     @for (driver of drivers(); track driver.driverId; let idx = $index) {
-      <app-driver [driver]="driver" [position]="idx + 1" />
+      <app-driver [driver]="driver" [position]="idx + 1" [searchedYear]="selectedYear()" />
     } @empty {
-      <div class="col-span-full flex flex-col items-center gap-3 py-20 text-center">
-        <svg class="w-12 h-12 text-gray-600" viewBox="0 0 48 48" fill="none">
+      <div class="col-span-full w-full flex flex-col items-center justify-center gap-3 py-32 text-center mix-blend-luminosity">
+        <svg class="w-16 h-16 text-gray-500 opacity-60 backdrop-blur-sm" viewBox="0 0 48 48" fill="none">
           <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" />
           <path
             d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5"
@@ -49,8 +49,8 @@
           <circle cx="18" cy="20" r="2" fill="currentColor" />
           <circle cx="30" cy="20" r="2" fill="currentColor" />
         </svg>
-        <p class="text-xl font-bold text-gray-400">No drivers this season</p>
-        <p class="text-sm text-gray-600">Try selecting a different year.</p>
+        <p class="text-xl font-bold text-gray-300 tracking-wide mt-2">No drivers this season</p>
+        <p class="text-sm text-gray-500 max-w-xs">There is no telemetry data on file for this selection. Try choosing a different calendar year.</p>
       </div>
     }
   }

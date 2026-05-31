@@ -1,17 +1,21 @@
-@keyframes swapUp {
-  0%   { transform: translateY(52px); opacity: 0.5; }
-  100% { transform: translateY(0);    opacity: 1;   }
+/* CDK structural transitions */
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes swapDown {
-  0%   { transform: translateY(-52px); opacity: 0.5; }
-  100% { transform: translateY(0);     opacity: 1;   }
+.cdk-drag-animating {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.swap-up {
-  animation: swapUp 240ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+/* Standing list placeholder */
+#standingList .cdk-drag-placeholder {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
-.swap-down {
-  animation: swapDown 240ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+/* Pool placeholder */
+#poolList .cdk-drag-placeholder {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  height: auto;
 }
