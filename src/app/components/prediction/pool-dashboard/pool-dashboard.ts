@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { PredictionHeader } from '../../common/prediction-header/prediction-header';
 import { WorkspaceItem } from '../../../interfaces/pool';
 import { PredictionService } from '../../../services/prediction/prediction-service';
+import { AuthService } from '../../../services/auth/auth-service';
 import { switchMap, of } from 'rxjs';
 
 @Component({
@@ -14,13 +15,18 @@ import { switchMap, of } from 'rxjs';
 })
 export class PoolDashboard implements OnInit {
   private predictionService = inject(PredictionService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   workspaces = signal<WorkspaceItem[]>([]);
   isLoading = signal<boolean>(true);
   activeModal = signal<'none' | 'create' | 'join'>('none');
+  currentUserId = signal<string | null>(null);
+  copiedCode = signal<string | null>(null);
 
   ngOnInit(): void {
+    const user = this.authService.currentUser();
+    this.currentUserId.set(user?.id ?? null);
     this.checkNavigationAndLoad();
   }
 
@@ -56,7 +62,8 @@ export class PoolDashboard implements OnInit {
               name: pool.name,
               type: 'group',
               memberCount: pool.memberCount,
-              inviteCode: pool.inviteCode
+              inviteCode: pool.inviteCode,
+              creatorId: pool.creatorId,
             });
           });
         }
@@ -71,10 +78,6 @@ export class PoolDashboard implements OnInit {
     });
   }
 
-  // FIX: Check if a prediction exists for this workspace before navigating.
-  // For personal: use getPredictionStatus (already cached/cheap).
-  // For group: call getSavedPrediction(poolId) — if it resolves with data go to
-  // view, if it throws (404) go to editor.
   navigateToWorkspace(item: WorkspaceItem): void {
     if (item.id === null) {
       this.predictionService.getPredictionStatus().pipe(
@@ -96,12 +99,21 @@ export class PoolDashboard implements OnInit {
             this.router.navigate(['/prediction/editor', item.id]);
           }
         },
-        error: () => {
-          // 404 = no prediction yet
-          this.router.navigate(['/prediction/editor', item.id]);
-        }
+        error: () => this.router.navigate(['/prediction/editor', item.id])
       });
     }
+  }
+
+  isCreator(item: WorkspaceItem): boolean {
+    return !!item.creatorId && item.creatorId === this.currentUserId();
+  }
+
+  copyInviteCode(event: Event, code: string): void {
+    event.stopPropagation();
+    navigator.clipboard.writeText(code).then(() => {
+      this.copiedCode.set(code);
+      setTimeout(() => this.copiedCode.set(null), 2000);
+    });
   }
 
   openCreateModal(): void { this.activeModal.set('create'); }

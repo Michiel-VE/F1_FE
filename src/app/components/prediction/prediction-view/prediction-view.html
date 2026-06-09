@@ -1,58 +1,179 @@
 <div class="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12">
   <div class="max-w-4xl mx-auto h-[calc(100vh-6rem)] flex flex-col">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-6 mb-8 flex-shrink-0"
-    >
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-6 mb-8 flex-shrink-0">
       <div>
-        <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-white">
-          {{ title() }}
-        </h2>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-white">{{ title() }}</h2>
         <p class="text-sm text-slate-400 mt-1">{{ subtitle() }}</p>
       </div>
-      <button
-        (click)="goBack()"
-        class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-sm hover:bg-slate-700 transition-colors duration-150 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 cursor-pointer"
-      >
-        <svg class="w-3.5 h-3.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2.5"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        Dashboard
-      </button>
+      <div class="flex items-center gap-4">
+        <div class="text-right">
+          <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Score</p>
+          <p class="text-2xl font-mono font-bold text-emerald-400">
+            {{ totalScore() }}<span class="text-slate-600 text-sm">/{{ maxScore() }}</span>
+          </p>
+        </div>
+        <button
+          (click)="goBack()"
+          class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-sm hover:bg-slate-700 transition-colors duration-150 ease-in-out cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+          </svg>
+          Dashboard
+        </button>
+      </div>
     </div>
 
     <div class="space-y-3 overflow-y-auto pr-1">
-      @for (team of savedTeams(); track team.id; let i = $index) {
-        <div
-          class="flex items-center gap-4 bg-slate-900 border border-slate-800/60 rounded-xl p-4 shadow-sm hover:border-slate-700/80 transition-all duration-150"
-        >
-          <div
-            class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-950 border border-slate-800 font-mono text-sm font-bold text-red-600"
+
+      @if (!poolId()) {
+        @for (entry of scoredTeams(); track entry.team.id) {
+          <div class="flex items-center gap-4 bg-slate-900 border rounded-xl p-4 shadow-sm transition-all duration-150"
+            [class.border-emerald-800]="entry.points === 5"
+            [class.border-yellow-800]="entry.points === 3"
+            [class.border-slate-700]="entry.points === 1"
+            [class.border-slate-800]="entry.points === 0"
           >
-            {{ i + 1 }}
+            <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-950 border border-slate-800 font-mono text-sm font-bold text-red-600">
+              {{ entry.predictedPosition }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <span class="block text-base font-semibold text-slate-200 truncate">{{ entry.team.name }}</span>
+              <span class="text-xs text-slate-500">
+                actual: #{{ entry.actualPosition }}
+                @if (entry.actualPosition < entry.predictedPosition) {
+                  <span class="text-emerald-500 ml-1">▲ {{ entry.predictedPosition - entry.actualPosition }}</span>
+                } @else if (entry.actualPosition > entry.predictedPosition) {
+                  <span class="text-red-500 ml-1">▼ {{ entry.actualPosition - entry.predictedPosition }}</span>
+                } @else {
+                  <span class="text-emerald-400 ml-1">✓ exact</span>
+                }
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-950 border border-slate-800 font-mono text-xs font-medium text-slate-400 uppercase tracking-wider">
+                {{ entry.team.shortName }}
+              </div>
+              <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg font-mono text-sm font-bold"
+                [class.bg-emerald-950]="entry.points === 5"
+                [class.text-emerald-400]="entry.points === 5"
+                [class.bg-yellow-950]="entry.points === 3"
+                [class.text-yellow-400]="entry.points === 3"
+                [class.bg-slate-800]="entry.points <= 1"
+                [class.text-slate-400]="entry.points === 1"
+                [class.text-slate-600]="entry.points === 0"
+              >
+                +{{ entry.points }}
+              </div>
+            </div>
           </div>
-          <div class="flex-1 min-w-0">
-            <span class="block text-base font-semibold text-slate-200 truncate">{{
-              team.name
-            }}</span>
+        } @empty {
+          <div class="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-slate-800 bg-slate-900/20">
+            <p class="text-sm font-medium text-slate-400">No saved prediction configuration found.</p>
           </div>
-          <div
-            class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-950 border border-slate-800 font-mono text-xs font-medium text-slate-400 uppercase tracking-wider"
+        }
+      }
+
+      @if (poolId()) {
+        @if (memberScores().length > 0) {
+          <div class="space-y-2">
+            @for (member of memberScores(); track member.userId; let i = $index) {
+              <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                <div class="w-full flex items-center gap-4 p-4">
+                  <button
+                    (click)="toggleMember(i)"
+                    class="flex items-center gap-4 flex-1 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-950 border border-slate-700 font-mono text-xs font-bold text-slate-400">
+                      {{ i + 1 }}
+                    </div>
+                    @if (member.picture) {
+                      <img [src]="member.picture" class="w-7 h-7 rounded-full object-cover" />
+                    }
+                    <span class="flex-1 text-left text-sm font-semibold text-slate-200">{{ member.username }}</span>
+                    <span class="font-mono text-sm font-bold text-emerald-400">{{ member.totalScore }}<span class="text-slate-600">/{{ maxScore() }}</span></span>
+                    <svg class="w-4 h-4 text-slate-500 transition-transform duration-200" [class.rotate-180]="member.expanded" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  @if (isCreator() && member.userId !== currentUserId()) {
+                    <button
+                      (click)="kickMember(member.userId)"
+                      class="ml-2 text-[0.55rem] font-bold uppercase tracking-widest px-2 py-1 border border-red-900/50 text-red-600 hover:bg-red-950/30 rounded-xs transition-colors cursor-pointer shrink-0"
+                    >
+                      Kick
+                    </button>
+                  }
+                </div>
+
+                @if (member.expanded) {
+                  <div class="border-t border-slate-800 divide-y divide-slate-800/60">
+                    @for (entry of member.scoredTeams; track entry.team.id) {
+                      <div class="flex items-center gap-3 px-4 py-2.5">
+                        <span class="w-5 text-center font-mono text-xs text-slate-500">{{ entry.predictedPosition }}</span>
+                        <span class="flex-1 text-sm text-slate-300">{{ entry.team.name }}</span>
+                        <span class="text-xs">
+                          @if (entry.actualPosition < entry.predictedPosition) {
+                            <span class="text-emerald-500">▲ {{ entry.predictedPosition - entry.actualPosition }}</span>
+                          } @else if (entry.actualPosition > entry.predictedPosition) {
+                            <span class="text-red-500">▼ {{ entry.actualPosition - entry.predictedPosition }}</span>
+                          } @else {
+                            <span class="text-emerald-400">✓</span>
+                          }
+                        </span>
+                        <span class="font-mono text-xs font-bold w-6 text-right"
+                          [class.text-emerald-400]="entry.points === 5"
+                          [class.text-yellow-400]="entry.points === 3"
+                          [class.text-slate-400]="entry.points === 1"
+                          [class.text-slate-600]="entry.points === 0"
+                        >+{{ entry.points }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-slate-800 bg-slate-900/20">
+            <p class="text-sm font-medium text-slate-400">No predictions submitted in this group yet.</p>
+          </div>
+        }
+
+        <!-- Leave / Dissolve section -->
+        <div class="mt-6 pt-6 border-t border-slate-800">
+          <button
+            (click)="leavePool()"
+            class="text-xs font-bold uppercase tracking-widest px-4 py-2 border rounded-lg transition-colors cursor-pointer"
+            [class]="isCreator() ? 'border-red-900/50 text-red-600 hover:bg-red-950/30' : 'border-slate-700 text-slate-500 hover:text-red-400 hover:border-red-900/50'"
           >
-            {{ team.shortName }}
-          </div>
-        </div>
-      } @empty {
-        <div
-          class="flex flex-col items-center justify-center text-center p-12 rounded-2xl border border-dashed border-slate-800 bg-slate-900/20"
-        >
-          <p class="text-sm font-medium text-slate-400">No saved prediction configuration found.</p>
+            {{ isCreator() ? 'Dissolve Group' : 'Leave Group' }}
+          </button>
         </div>
       }
+
     </div>
   </div>
 </div>
+
+@if (showLeaveConfirm()) {
+  <div class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+    <div class="bg-zinc-950 border border-white/10 p-6 rounded-sm w-full max-w-md shadow-2xl">
+      <h3 class="text-white font-black uppercase italic tracking-tighter text-xl mb-4 border-l-4 border-red-600 pl-3">
+        Dissolve Group
+      </h3>
+      <p class="text-gray-400 text-sm mb-6">
+        You are the creator of this group. Leaving will permanently dissolve the pool and delete all predictions from every member. This cannot be undone.
+      </p>
+      <div class="flex gap-3 justify-end text-xs font-bold uppercase tracking-widest">
+        <button (click)="showLeaveConfirm.set(false)" class="px-4 py-2.5 text-gray-500 hover:text-white transition-colors cursor-pointer">
+          Cancel
+        </button>
+        <button (click)="confirmLeave()" class="bg-red-600 hover:bg-red-700 text-white font-black italic px-5 py-2.5 transition-colors cursor-pointer">
+          Dissolve
+        </button>
+      </div>
+    </div>
+  </div>
+}

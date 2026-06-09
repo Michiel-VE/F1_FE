@@ -11,7 +11,7 @@ import { join, resolve } from 'node:path';
 /**
  * Resolve the browser directory robustly for hosted environments
  */
-const browserDistFolder = process.env['BROWSER_DIST_FOLDER'] 
+const browserDistFolder = process.env['BROWSER_DIST_FOLDER']
   ? resolve(process.env['BROWSER_DIST_FOLDER'])
   : join(import.meta.dirname, '../browser');
 
@@ -26,19 +26,20 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'self'", "'unsafe-hashes'", "'unsafe-inline'"], 
+        scriptSrcAttr: ["'self'", "'unsafe-hashes'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        imgSrc: ["'self'", "data:", "https:"],
+        styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: [
-          "'self'", 
-          "https://f1-api.michielve.be", 
-          "http://localhost:8080"
+          "'self'",
+          'https://f1-api.michielve.be',
+          'http://localhost:8080',
+          'https://accounts.google.com',
         ],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       },
     },
-  })
+  }),
 );
 
 const angularApp = new AngularNodeAppEngine();
@@ -72,9 +73,7 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 

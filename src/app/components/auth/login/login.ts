@@ -33,11 +33,17 @@ export class Login implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       const params = this.route.snapshot.queryParams;
+      const errorParam = params['error'];
+
+      if (errorParam) {
+        this.errorMessage.set(this.mapErrorMessage(errorParam));
+        return;
+      }
+
       const rawReturnUrl = params['returnUrl'] || '/';
       const returnUrl =
         rawReturnUrl.match(/^\/[^/].*/) || rawReturnUrl === '/' ? rawReturnUrl : '/';
 
-      // After OAuth redirect the cookie is already set — check and redirect
       this.authService.checkAuth().subscribe((loggedIn) => {
         if (loggedIn) {
           this.router.navigateByUrl(returnUrl, { replaceUrl: true });
@@ -75,5 +81,14 @@ export class Login implements OnInit {
         );
       },
     });
+  }
+
+  private mapErrorMessage(errorKey: string): string {
+    switch (errorKey) {
+      case 'user_creation_failed':
+        return 'Account creation failed during sign-in. Please contact support.';
+      default:
+        return 'An error occurred during authentication. Please try again.';
+    }
   }
 }

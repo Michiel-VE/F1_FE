@@ -33,12 +33,24 @@ export class PredictionService {
     return this.http.get<any>(`${this.apiPredictionsUrl}/team/pool/${poolId}`);
   }
 
+  getPoolDetails(poolId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiPredictionsUrl}/pools/${poolId}`);
+  }
+
   createPool(name: string): Observable<any> {
     return this.http.post(`${this.apiPredictionsUrl}/pools`, { name });
   }
 
   joinPool(inviteCode: string): Observable<any> {
     return this.http.post(`${this.apiPredictionsUrl}/pools/join`, { inviteCode });
+  }
+
+  leavePool(poolId: string): Observable<any> {
+    return this.http.delete(`${this.apiPredictionsUrl}/pools/${poolId}/leave`);
+  }
+
+  kickMember(poolId: string, memberId: string): Observable<any> {
+    return this.http.delete(`${this.apiPredictionsUrl}/pools/${poolId}/members/${memberId}`);
   }
 
   postTeamPrediction(payload: { poolId: string | null; predictedTeams: string[] }): Observable<any> {

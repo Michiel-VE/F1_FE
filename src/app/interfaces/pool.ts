@@ -7,11 +7,12 @@ export interface PoolSummaryResponse {
 }
 
 export interface WorkspaceItem {
-  id: string | null; // null represents the unique personal prediction workspace
+  id: string | null;
   name: string;
   type: 'personal' | 'group';
   memberCount?: number;
   inviteCode?: string;
+  creatorId?: string;
 }
 
 export interface PoolDetailsResponse {
