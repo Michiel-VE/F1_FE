@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PredictionService } from '../../../services/prediction/prediction-service';
 import { AuthService } from '../../../services/auth/auth-service';
+import { ToastService } from '../../../services/toast/toast-service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Team } from '../../../interfaces/team';
 import { forkJoin, of } from 'rxjs';
@@ -33,6 +34,7 @@ interface MemberScore {
 export class PredictionView implements OnInit {
   private predictionService = inject(PredictionService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -158,9 +160,21 @@ export class PredictionView implements OnInit {
   private doLeave(): void {
     const poolId = this.poolId();
     if (!poolId) return;
+
+    const isCreatorLeaving = this.isCreator();
+
     this.predictionService.leavePool(poolId).subscribe({
-      next: () => this.router.navigate(['/prediction']),
-      error: (err: any) => alert(err.error?.error || 'Failed to leave pool.')
+      next: () => {
+        const successMessage = isCreatorLeaving 
+          ? 'Group was successfully deleted.' 
+          : 'Successfully left the group.';
+        this.toastService.show(successMessage, 'success');
+        this.router.navigate(['/prediction']);
+      },
+      error: (err: any) => {
+        const errorMessage = err.error?.error || err.error?.message || 'Failed to process request.';
+        this.toastService.show(errorMessage, 'error');
+      }
     });
   }
 
@@ -170,8 +184,12 @@ export class PredictionView implements OnInit {
     this.predictionService.kickMember(poolId, userId).subscribe({
       next: () => {
         this.memberScores.update(scores => scores.filter(s => s.userId !== userId));
+        this.toastService.show('Member successfully removed.', 'success');
       },
-      error: (err: any) => alert(err.error?.error || 'Failed to kick member.')
+      error: (err: any) => {
+        const errorMessage = err.error?.error || err.error?.message || 'Failed to kick member.';
+        this.toastService.show(errorMessage, 'error');
+      }
     });
   }
 

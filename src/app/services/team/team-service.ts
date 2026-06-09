@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { CacheEntry } from '../../interfaces/cache-entry';
-import { PersistentCacheService  } from '../cache/cache-service';
+import { PersistentCacheService } from '../cache/cache-service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -11,7 +11,7 @@ import { environment } from '../../../environments/environment';
 })
 export class TeamService {
   private http = inject(HttpClient);
-  private cacheService = inject(PersistentCacheService );
+  private cacheService = inject(PersistentCacheService);
 
   private readonly DAYLIST: Record<string, number> = {
     Sunday: 0,
@@ -62,7 +62,6 @@ export class TeamService {
 
   private fetchAndCacheData<T>(key: string, year: string): Observable<T> {
     const url = this.buildUrl(year);
-    console.log(`[TeamService] Fetching data for key ${key} from API. year: ${year}, endpoint: ${url}`);
 
     return this.http.get<T>(url).pipe(
       tap((data) => {
@@ -76,7 +75,6 @@ export class TeamService {
           .catch((error) => console.error(`[Cache] Failed to save data for key ${key}:`, error));
       }),
       catchError((error) => {
-        console.error(`[TeamService] Error fetching data from ${url}:`, error);
         throw error;
       }),
     );

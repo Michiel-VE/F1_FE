@@ -41,7 +41,6 @@ export class DriverResult {
             this.historicalAvg.set(res.historicalAvg);
           },
           error: (err) => {
-            console.error('API Error:', err);
             this.rawResults.set([]);
             this.historicalAvg.set(0);
           },
@@ -53,7 +52,6 @@ export class DriverResult {
             this.historicalAvg.set(0);
           },
           error: (err) => {
-            console.error('API Error:', err);
             this.rawResults.set([]);
             this.historicalAvg.set(0);
           },

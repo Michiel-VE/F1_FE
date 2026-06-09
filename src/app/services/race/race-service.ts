@@ -41,7 +41,6 @@ export class RaceService {
 
   private fetchAndCacheData<T>(key: string, year: string): Observable<T> {
     const url = this.buildUrl(year);
-    console.log(`[RaceService] Fetching data for key ${key} from API. year: ${year}, endpoint: ${url}`);
 
     return this.http.get<T>(url).pipe(
       tap((data) => {
@@ -55,7 +54,6 @@ export class RaceService {
           .catch((error) => console.error(`[Cache] Failed to save data for key ${key}:`, error));
       }),
       catchError((error) => {
-        console.error(`[RaceService] Error fetching data from ${url}:`, error);
         throw error;
       }),
     );

@@ -100,7 +100,6 @@ export class Navbar {
         this.router.navigate(['/']);
       },
       error: (err) => {
-        console.error('Logout failed', err);
       },
     });
   }

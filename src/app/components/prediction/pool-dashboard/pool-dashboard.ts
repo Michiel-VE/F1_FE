@@ -6,6 +6,7 @@ import { WorkspaceItem } from '../../../interfaces/pool';
 import { PredictionService } from '../../../services/prediction/prediction-service';
 import { AuthService } from '../../../services/auth/auth-service';
 import { switchMap, of } from 'rxjs';
+import { ToastService } from '../../../services/toast/toast-service';
 
 @Component({
   selector: 'app-pool-dashboard',
@@ -16,6 +17,7 @@ import { switchMap, of } from 'rxjs';
 export class PoolDashboard implements OnInit {
   private predictionService = inject(PredictionService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
 
   workspaces = signal<WorkspaceItem[]>([]);
@@ -72,7 +74,6 @@ export class PoolDashboard implements OnInit {
         this.isLoading.set(false);
       },
       error: (err: any) => {
-        console.error('Failed fetching workspace aggregates', err);
         this.isLoading.set(false);
       }
     });
@@ -112,6 +113,7 @@ export class PoolDashboard implements OnInit {
     event.stopPropagation();
     navigator.clipboard.writeText(code).then(() => {
       this.copiedCode.set(code);
+      this.toastService.show('Invite code copied to clipboard.', 'success');
       setTimeout(() => this.copiedCode.set(null), 2000);
     });
   }
@@ -126,13 +128,21 @@ export class PoolDashboard implements OnInit {
 
     if (this.activeModal() === 'create') {
       this.predictionService.createPool(sanitizedValue).subscribe({
-        next: () => { this.closeModal(); this.checkNavigationAndLoad(); },
-        error: (err: any) => alert(err.error?.error || 'Failed to create group.')
+        next: () => { 
+          this.closeModal(); 
+          this.checkNavigationAndLoad();
+          this.toastService.show('Group successfully created.', 'success');
+        },
+        error: (err: any) => this.toastService.show(err.error?.error || 'Failed to create group.', 'error')
       });
     } else if (this.activeModal() === 'join') {
       this.predictionService.joinPool(sanitizedValue).subscribe({
-        next: () => { this.closeModal(); this.checkNavigationAndLoad(); },
-        error: (err: any) => alert(err.error?.error || 'Invalid invite code.')
+        next: () => { 
+          this.closeModal(); 
+          this.checkNavigationAndLoad();
+          this.toastService.show('Successfully joined group.', 'success');
+        },
+        error: (err: any) => this.toastService.show(err.error?.error || 'Invalid invite code.', 'error')
       });
     }
   }

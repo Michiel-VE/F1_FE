@@ -67,9 +67,6 @@ export class DriverService {
       year != this.getCurrentYear()
         ? `${environment.baseUrl}/drivers/${year}`
         : this.ENDPOINT_URL;
-    console.log(
-      `[DriverService] Fetching data for key ${key} from API., year: ${year}, endpoint: ${this.ENDPOINT_URL}`,
-    );
 
     return this.http.get<T>(this.ENDPOINT_URL).pipe(
       tap((data) => {
@@ -85,7 +82,6 @@ export class DriverService {
           .catch((error) => console.error(`[Cache] Failed to save data for key ${key}:`, error));
       }),
       catchError((error) => {
-        console.error(`[HTTP] Error fetching data from ${this.ENDPOINT_URL}:`, error);
         throw error;
       }),
     );

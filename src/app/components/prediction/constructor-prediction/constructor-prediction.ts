@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed, inject, HostListener } from '@angu
 import { CommonModule } from '@angular/common';
 import { Team } from '../../../interfaces/team';
 import { PredictionService } from '../../../services/prediction/prediction-service';
+import { ToastService } from '../../../services/toast/toast-service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { DragDropModule, CdkDragDrop, CdkDragStart, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -61,6 +62,7 @@ export class ConstructorPrediction implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private predictionService = inject(PredictionService);
+  private toastService = inject(ToastService);
   private moving = false;
 
   readonly allTeams = signal<Team[]>([]);
@@ -114,7 +116,6 @@ export class ConstructorPrediction implements OnInit {
           this.hasGroups.set(false);
         }
 
-        // FIX: predictedTeams is string[] (UUIDs), not objects
         if (savedPrediction?.predictedTeams?.length) {
           const loadedSelection: Team[] = savedPrediction.predictedTeams
             .map((id: string) => verifiedTeams.find((t: Team) => t.id === id))
@@ -235,27 +236,25 @@ export class ConstructorPrediction implements OnInit {
       this.predictionService.createPool(sanitizedValue).subscribe({
         next: () => {
           this.closeModal();
+          this.toastService.show('Group successfully created.', 'success');
           this.navigateBack();
         },
-        error: (err: any) => alert(err.error?.error || 'Failed to create group.'),
+        error: (err: any) => this.toastService.show(err.error?.error || 'Failed to create group.', 'error'),
       });
     } else if (this.activeModal() === 'join') {
       this.predictionService.joinPool(sanitizedValue).subscribe({
         next: () => {
           this.closeModal();
+          this.toastService.show('Successfully joined group.', 'success');
           this.navigateBack();
         },
-        error: (err: any) => alert(err.error?.error || 'Invalid invite code.'),
+        error: (err: any) => this.toastService.show(err.error?.error || 'Invalid invite code.', 'error'),
       });
     }
   }
 
   submitPrediction(): void {
     const orderedIds = this.rankedSelection().map((team: Team) => team.id);
-    console.log(
-      'Submitting order:',
-      this.rankedSelection().map((t: Team) => t.name),
-    );
 
     const payload = {
       poolId: this.currentPoolId(),
@@ -267,12 +266,12 @@ export class ConstructorPrediction implements OnInit {
         const message = payload.poolId
           ? 'Group prediction locked in!'
           : 'Personal prediction locked in!';
-        alert(message);
+        this.toastService.show(message, 'success');
         this.navigateBack();
       },
       error: (err: any) => {
         console.error('Submission rejected', err);
-        alert(err.error?.message || 'Failed to submit selection.');
+        this.toastService.show(err.error?.message || 'Failed to submit selection.', 'error');
       },
     });
   }
