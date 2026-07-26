@@ -1,0 +1,34 @@
+name: Deploy Angular SSR to OCI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy files to server via SSH
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: opc
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "."
+          target: "/home/opc/app"
+
+      - name: Build and run Docker container via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: opc
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/opc/app
+            docker build -t frontend-app .
+            docker stop my-frontend || true
+            docker rm my-frontend || true
+            docker run -d --name my-frontend -p 4000:4000 frontend-app
