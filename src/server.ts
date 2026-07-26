@@ -22,7 +22,7 @@ app.set('trust proxy', true);
 /**
  * Helmet configuration
  */
-app.use(
+//app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
