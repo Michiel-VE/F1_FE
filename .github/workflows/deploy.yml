@@ -28,7 +28,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/opc/app
-            docker build -t frontend-app .
-            docker stop my-frontend || true
-            docker rm my-frontend || true
-            docker run -d --name my-frontend -p 4000:4000 frontend-app
+            docker build -t f1-app-image .
+            docker stop f1-app || true
+            docker rm f1-app || true
+            docker run -d --name f1-app -p 127.0.0.1:4000:4000 f1-app-image
