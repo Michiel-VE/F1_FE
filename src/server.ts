@@ -17,6 +17,8 @@ const browserDistFolder = process.env['BROWSER_DIST_FOLDER']
 
 const app = express();
 
+app.set('trust proxy', true);
+
 /**
  * Helmet configuration
  */
