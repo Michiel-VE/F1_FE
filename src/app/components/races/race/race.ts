@@ -27,8 +27,17 @@ export class RaceCard {
   protected readonly RaceStatus = RaceStatus;
 
   readonly isRound = computed(() => this.roundNumber() > 0);
-  readonly startDate = computed(() => new Date(this.race().startDay));
-  readonly endDate = computed(() => new Date(this.race().endDay));
+  readonly startDate = computed(() => {
+    const [year, month, day] = this.race().startDay.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  });
+
+  readonly endDate = computed(() => {
+    const [year, month, day] = this.race().endDay.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setHours(23, 59, 59, 999);
+    return date;
+  });
 
   readonly monthShort = computed(() =>
     this.startDate().toLocaleString('en-GB', { month: 'short' }).toUpperCase(),
