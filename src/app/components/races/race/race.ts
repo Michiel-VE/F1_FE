@@ -119,7 +119,7 @@ export class RaceCard {
 
   readonly badge = computed<BadgeConfig | null>(() => {
     if (this.isCurrent()) {
-      return { label: 'On Now', class: 'text-red-400 border-red-600/40 bg-red-900/30' };
+      return { label: 'Happening now', class: 'text-red-400 border-red-600/40 bg-red-900/30' };
     }
 
     const status = this.race().status;
