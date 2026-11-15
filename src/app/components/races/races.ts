@@ -120,17 +120,31 @@ export class Races implements OnInit {
     this.pastExpanded.update((v) => !v);
   }
 
+  private parseLocalDate(dateStr: string, isEnd: boolean = false): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (isEnd) {
+      return new Date(year, month - 1, day, 23, 59, 59, 999);
+    }
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+
   isCurrentRace(race: Race): boolean {
     const now = new Date();
-    return new Date(race.startDay) <= now && new Date(race.endDay) >= now;
+    const start = this.parseLocalDate(race.startDay, false);
+    const end = this.parseLocalDate(race.endDay, true);
+    return now >= start && now <= end;
   }
 
   isUpcoming(race: Race): boolean {
-    return new Date(race.startDay) > new Date();
+    const now = new Date();
+    const start = this.parseLocalDate(race.startDay, false);
+    return start > now;
   }
 
   isPast(race: Race): boolean {
-    return new Date(race.endDay) < new Date();
+    const now = new Date();
+    const end = this.parseLocalDate(race.endDay, true);
+    return end < now;
   }
 
   getRoundNumber(race: Race): number {

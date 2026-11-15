@@ -15,7 +15,7 @@ export class DriverService {
     const cached = this.cache.get<T>(key);
     if (cached) return of(cached);
 
-    const url = `${environment.baseUrl}/drivers/${year}`;
+    const url = `${environment.baseUrl}/drivers/season/${year}`;
     return this.http.get<T>(url).pipe(
       tap(data => {
         if (data) this.cache.set(key, data, this.CACHE_TTL);
