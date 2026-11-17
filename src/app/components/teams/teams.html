@@ -7,48 +7,48 @@
 
 <app-error [error]="error()" (retry)="retryFetch()" />
 
-<section
-  class="mx-4 sm:mx-12 pb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch"
->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
   @if (isLoading()) {
-    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-      <div
-        class="relative bg-white/[0.03] border border-white/[0.07] rounded-xl p-5 overflow-hidden animate-pulse"
-      >
-        <div class="flex flex-col gap-3">
-          <div class="flex justify-between items-start">
-            <div class="flex flex-col gap-2">
-              <div class="h-3 bg-white/[0.06] rounded w-16"></div>
-              <div class="h-6 bg-white/[0.06] rounded w-36"></div>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-white/[0.06]"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[400px]">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="relative bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden animate-pulse shadow-xl">
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-12 h-12 rounded-xl bg-white/5"></div>
+            <div class="w-16 h-6 rounded-full bg-white/5"></div>
           </div>
-          <div class="h-px bg-white/[0.04]"></div>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="h-12 bg-white/[0.06] rounded-lg"></div>
-            <div class="h-12 bg-white/[0.06] rounded-lg"></div>
+          <div class="flex flex-col gap-3">
+            <div class="h-3 bg-white/5 rounded w-1/4"></div>
+            <div class="h-7 bg-white/5 rounded w-3/4"></div>
+            <div class="h-4 bg-white/5 rounded w-1/2 mt-1"></div>
+          </div>
+          <div class="my-6 h-px bg-white/10 w-full"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="h-14 bg-white/5 rounded-xl"></div>
+            <div class="h-14 bg-white/5 rounded-xl"></div>
           </div>
         </div>
-      </div>
-    }
+      }
+    </div>
   } @else {
-    @for (team of teams(); track team.id; let idx = $index) {
-      <app-team-card [team]="team" [position]="idx + 1" />
-    } @empty {
-      <div class="col-span-full flex flex-col items-center gap-3 py-20 text-center">
-        <svg class="w-12 h-12 text-gray-600" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" />
-          <path
-            d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-          <circle cx="18" cy="20" r="2" fill="currentColor" />
-          <circle cx="30" cy="20" r="2" fill="currentColor" />
-        </svg>
-        <p class="text-xl font-bold text-gray-400">No teams found</p>
-        <p class="text-sm text-gray-600">Check back later for updates.</p>
+    @if (teams().length === 0) {
+      <div class="w-full flex flex-col items-center justify-center gap-4 py-32 text-center">
+        <div class="w-20 h-20 rounded-full bg-slate-900/60 border border-white/10 flex items-center justify-center text-slate-400 shadow-inner">
+          <svg class="w-8 h-8 opacity-70" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" />
+            <path d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="18" cy="20" r="2" fill="currentColor" />
+            <circle cx="30" cy="20" r="2" fill="currentColor" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-white tracking-tight">No teams found</h3>
+        <p class="text-sm text-slate-400 max-w-sm">Check back later for constructor standings updates.</p>
+      </div>
+    } @else {
+      <!-- Bento Grid Layout Matching the Driver Standings -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        @for (team of teams(); track team.id; let idx = $index) {
+          <app-team-card [team]="team" [position]="idx + 1" />
+        }
       </div>
     }
   }
