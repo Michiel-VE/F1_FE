@@ -30,7 +30,7 @@ export class PredictionService {
     if (!poolId) {
       return this.http.get<any>(`${this.apiPredictionsUrl}/team/personal`);
     }
-    return this.http.get<any>(`${this.apiPredictionsUrl}/team/pool/${poolId}`);
+    return this.http.get<any>(`${this.apiPredictionsUrl}/pools/${poolId}/team`);
   }
 
   getPoolDetails(poolId: string): Observable<any> {
@@ -46,7 +46,7 @@ export class PredictionService {
   }
 
   leavePool(poolId: string): Observable<any> {
-    return this.http.delete(`${this.apiPredictionsUrl}/pools/${poolId}/leave`);
+    return this.http.delete(`${this.apiPredictionsUrl}/pools/${poolId}`);
   }
 
   kickMember(poolId: string, memberId: string): Observable<any> {
