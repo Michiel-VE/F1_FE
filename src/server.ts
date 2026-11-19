@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import helmet from 'helmet';
+import crypto from 'node:crypto';
 import { join, resolve } from 'node:path';
 
 /**
@@ -19,16 +20,24 @@ const app = express();
 
 app.set('trust proxy', true);
 
+// Generate a fresh per-request CSP nonce
+app.use((_req, res, next) => {
+  res.locals['cspNonce'] = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
 /**
  * Helmet configuration
  */
-app.use(
+app.use((req, res, next) => {
+  const nonce = `'nonce-${res.locals['cspNonce']}'`;
+
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'self'", "'unsafe-hashes'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", nonce],
+        scriptSrcAttr: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         imgSrc: ["'self'", 'data:', 'https:'],
@@ -41,10 +50,18 @@ app.use(
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       },
     },
-  }),
-);
+  })(req, res, next);
+});
 
 const angularApp = new AngularNodeAppEngine();
+
+function injectScriptNonce(html: string, nonce: string): string {
+  if (!nonce) {
+    return html;
+  }
+
+  return html.replace(/<script(?![^>]*\bnonce=)/gi, `<script nonce="${nonce}"`);
+}
 
 /**
  * Example Express Rest API endpoints can be defined here.
@@ -53,7 +70,7 @@ const angularApp = new AngularNodeAppEngine();
  * Example:
  * ```ts
  * app.get('/api/{*splat}', (req, res) => {
- * // Handle API request
+ *   // Handle API request
  * });
  * ```
  */
@@ -73,9 +90,35 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
+  const nonce = res.locals['cspNonce'] as string;
+
   angularApp
     .handle(req)
-    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
+    .then(async (response) => {
+      if (!response) {
+        next();
+        return;
+      }
+
+      const contentType = response.headers.get('content-type') ?? '';
+      if (contentType.includes('text/html')) {
+        const html = await response.text();
+        const updatedHtml = injectScriptNonce(html, nonce);
+        const headers = new Headers(response.headers);
+        headers.delete('content-length');
+
+        const patchedResponse = new Response(updatedHtml, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+
+        writeResponseToNodeResponse(patchedResponse, res);
+        return;
+      }
+
+      writeResponseToNodeResponse(response, res);
+    })
     .catch(next);
 });
 

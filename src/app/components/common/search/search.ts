@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal, OnInit, model } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -10,6 +10,7 @@ import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angul
 })
 export class Search implements OnInit {
   searchedYear = model<string>(new Date().getFullYear().toString());
+  seasonCount = input<number>(10);
 
   years = signal<number[]>([]);
   searchForm!: FormGroup;
@@ -24,12 +25,15 @@ export class Search implements OnInit {
   }
 
   private generateYears(): number[] {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: 6 }, (_, i) => currentYear - i);
-}
+    const currentYear = new Date().getFullYear();
+    const count = Math.max(1, this.seasonCount());
+    return Array.from({ length: count }, (_, i) => currentYear - i);
+  }
 
   onSubmit() {
     const selectedValue = this.searchForm.get('seasonYear')?.value;
-    this.searchedYear.set(selectedValue);
+    if (selectedValue && selectedValue !== this.searchedYear()) {
+      this.searchedYear.set(selectedValue);
+    }
   }
 }

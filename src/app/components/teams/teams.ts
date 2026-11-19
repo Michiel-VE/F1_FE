@@ -8,10 +8,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, catchError, of, switchMap, tap } from 'rxjs';
 import { TeamService } from '../../services/team/team-service';
 import { Team } from '../../interfaces/team';
 import { ErrorState } from '../../interfaces/error-state';
-import { finalize } from 'rxjs/operators';
 import { TeamCard } from './team/team';
 import { Header } from '../common/header/header';
 import { Error as ErrorComponent } from '../common/error/error';
@@ -27,6 +27,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class Teams implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly yearChanges$ = new Subject<string>();
 
   readonly teams = signal<Team[]>([]);
   readonly isLoading = signal(false);
@@ -35,42 +36,52 @@ export class Teams implements OnInit {
   readonly selectedYear = signal<string>(new Date().getFullYear().toString());
   year: string = new Date().getFullYear().toString();
 
+  constructor() {
+    this.yearChanges$
+      .pipe(
+        tap((newYear) => {
+          this.year = newYear;
+          this.selectedYear.set(newYear);
+          this.teams.set([]);
+          this.isLoading.set(true);
+          this.error.set(null);
+        }),
+        switchMap((newYear) =>
+          this.teamService.getData<Team[] | null>(`f1_teams_${newYear}`, newYear).pipe(
+            catchError((err: HttpErrorResponse) => {
+              if (err.status === 404 || err.status === 204) {
+                return of([] as Team[]);
+              }
+              this.error.set({
+                message: this.extractErrorMessage(err, 'Error fetching teams'),
+                timestamp: new Date(),
+                canRetry: true,
+              });
+              return of(null);
+            }),
+          ),
+        ),
+        tap(() => this.isLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((data) => {
+        if (data !== null) {
+          this.teams.set(Array.isArray(data) ? data : []);
+        }
+      });
+  }
+
   ngOnInit(): void {
-    this.fetchTeams();
+    this.yearChanges$.next(this.selectedYear());
   }
 
   onYearChange(newYear: string): void {
-    this.selectedYear.set(newYear);
-    this.fetchTeams();
+    if (!newYear) return;
+    this.yearChanges$.next(newYear);
   }
 
   retryFetch(): void {
-    this.fetchTeams();
-  }
-
-  private fetchTeams(): void {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    const year = this.selectedYear();
-    const cacheKey = `f1_teams_${year}`;
-
-    this.teamService
-      .getData<Team[]>(cacheKey, year)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isLoading.set(false)),
-      )
-      .subscribe({
-        next: (data) => this.teams.set(data || []),
-        error: (err) => {
-          this.error.set({
-            message: this.extractErrorMessage(err, 'Error fetching teams'),
-            timestamp: new Date(),
-            canRetry: true,
-          });
-        },
-      });
+    this.yearChanges$.next(this.selectedYear());
   }
 
   private extractErrorMessage(err: HttpErrorResponse, title: string): string {

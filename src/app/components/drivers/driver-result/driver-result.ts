@@ -15,17 +15,22 @@ import { ModalShell } from '../../modals/modal-shell';
   styleUrl: './driver-result.css',
 })
 export class DriverResult {
-  private data = inject(MODAL_DATA) as { driver: Driver; selectedYear: string };
+  private data = inject(MODAL_DATA) as {
+    driver: Driver;
+    selectedYear: string;
+    availableYears?: string[];
+  };
   private service = inject(DriverResultService);
 
-  readonly TOTAL_SEASON_RACES = 24;
   readonly CURRENT_YEAR = new Date().getFullYear().toString();
 
-  years = signal<string[]>(
-    Array.from({ length: 6 }, (_, i) => (new Date().getFullYear() - i).toString()),
+  availableYears = signal<string[]>(
+    this.data?.availableYears ??
+      Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()),
   );
+
   driver = signal(this.data?.driver);
-  selectedYear = signal(this.data?.selectedYear ?? new Date().getFullYear().toString());
+  selectedYear = signal(this.data?.selectedYear ?? this.CURRENT_YEAR);
   rawResults = signal<any[]>([]);
   historicalAvg = signal<number>(0);
 
@@ -40,7 +45,7 @@ export class DriverResult {
             this.rawResults.set(res.current.results ?? []);
             this.historicalAvg.set(res.historicalAvg);
           },
-          error: (err) => {
+          error: () => {
             this.rawResults.set([]);
             this.historicalAvg.set(0);
           },
@@ -51,7 +56,7 @@ export class DriverResult {
             this.rawResults.set(res.results ?? []);
             this.historicalAvg.set(0);
           },
-          error: (err) => {
+          error: () => {
             this.rawResults.set([]);
             this.historicalAvg.set(0);
           },
@@ -60,7 +65,6 @@ export class DriverResult {
     });
 
     effect(() => {
-      // Force chart rendering re-evaluations safely across year modifications
       this.selectedYear();
       this.rawResults();
       setTimeout(() => {
@@ -69,126 +73,74 @@ export class DriverResult {
     });
   }
 
-  totalPointsSum = computed(() => this.rawResults().reduce((acc, r) => acc + r.points, 0));
+  // Computes the total sum of both regular points and sprint points across all rounds
+  totalPointsSum = computed(() =>
+    this.rawResults().reduce((acc, r) => acc + (r.points ?? 0) + (r.sprintPoints ?? 0), 0),
+  );
 
   chartData = computed<ChartData<'line'>>(() => {
     const results = this.rawResults();
-    
-    // Fallback stub dataset to keep canvas structural boundaries intact when empty data is intended
+
     if (!results.length) {
-      return { 
-        labels: ['R1'], 
-        datasets: [{
-          label: 'No Data',
-          data: [0],
-          borderColor: 'transparent',
-          backgroundColor: 'transparent',
-          fill: false,
-          pointRadius: 0
-        }] 
+      return {
+        labels: ['R1'],
+        datasets: [
+          {
+            label: 'No Data',
+            data: [0],
+            borderColor: 'transparent',
+            backgroundColor: 'transparent',
+            fill: false,
+            pointRadius: 0,
+          },
+        ],
       };
     }
 
-    const racePoints = results.map((r) => r.points);
-    const labels = results.map((_, i) => `R${i + 1}`);
-    const lastIndex = racePoints.length - 1;
-    const lastActualPoint = racePoints[lastIndex];
-    const n = racePoints.length;
+    const racePoints = results.map((r) => r.points ?? 0);
+    // Only assign sprint points if r.isSprint is true; otherwise, return null so non-sprint weekends are omitted from the line
+    const sprintPoints = results.map((r) => (r.isSprint ? (r.sprintPoints ?? 0) : null));
 
-    const pointColors = racePoints.map((p) => (p === 0 ? '#ef4444' : '#3b82f6'));
-    const pointRadii = racePoints.map((p) => (p === 0 ? 6 : 5));
+    const labels = results.map((_, i) => `R${i + 1}`);
 
     const datasets: any[] = [
       {
-        label: 'Actual Points',
+        label: 'Race Points',
         data: racePoints,
         borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return 'rgba(59, 130, 246, 0.1)';
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, 'rgba(59, 130, 246, 0.0)');
+          gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+          return gradient;
+        },
         fill: true,
-        tension: 0.35,
-        pointRadius: pointRadii,
-        pointHoverRadius: 9,
-        pointHitRadius: 16,
-        pointBackgroundColor: pointColors,
-        pointBorderColor: pointColors,
-        pointBorderWidth: 2,
-        pointHoverBorderWidth: 3,
+        tension: 0.25,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#3b82f6',
         borderWidth: 2.5,
       },
+      {
+        label: 'Sprint Points',
+        data: sprintPoints,
+        borderColor: '#10b981',
+        backgroundColor: 'transparent',
+        fill: false,
+        spanGaps: true,
+        tension: 0.25,
+        pointRadius: sprintPoints.map((p) => (p !== null && p > 0 ? 5 : 0)),
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#10b981',
+        borderWidth: 2,
+        borderDash: [4, 4],
+      },
     ];
-
-    if (this.selectedYear() === this.CURRENT_YEAR && n < this.TOTAL_SEASON_RACES) {
-      const remaining = this.TOTAL_SEASON_RACES - n;
-      const seasonAvg = Math.round(racePoints.reduce((a, b) => a + b, 0) / n);
-
-      const simpleData = [lastActualPoint, ...Array(remaining).fill(seasonAvg)];
-      datasets.push({
-        label: 'Season Average',
-        data: [...Array(lastIndex).fill(null), ...simpleData],
-        borderColor: 'rgba(148, 163, 184, 0.35)',
-        borderDash: [10, 5],
-        pointRadius: 0,
-        pointHitRadius: 0,
-        fill: false,
-        tension: 0,
-      });
-
-      const recentRaces = racePoints.slice(-3);
-      const recentWeights = [1, 2, 3].slice(3 - recentRaces.length);
-      const recentWeightSum = recentWeights.reduce((a, b) => a + b, 0);
-      const recentForm =
-        recentRaces.reduce((acc, pts, i) => acc + pts * recentWeights[i], 0) / recentWeightSum;
-
-      let sumX = 0,
-        sumY = 0,
-        sumXY = 0,
-        sumX2 = 0;
-      for (let i = 0; i < n; i++) {
-        sumX += i;
-        sumY += racePoints[i];
-        sumXY += i * racePoints[i];
-        sumX2 += i * i;
-      }
-      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX) || 0;
-      const slopeTrust = Math.min(n / 8, 1);
-      const dampedSlope = slope * slopeTrust;
-
-      const historicalBaseline = this.historicalAvg() > 0 ? this.historicalAvg() : seasonAvg;
-
-      const W_RECENT = 0.5;
-      const W_TRAJECTORY = 0.3;
-      const W_HISTORICAL = 0.2;
-
-      const forecastData: number[] = [lastActualPoint];
-      let rollingBase = lastActualPoint;
-
-      for (let i = 1; i <= remaining; i++) {
-        const trajectoryContribution = rollingBase + dampedSlope;
-        const predicted =
-          W_RECENT * recentForm +
-          W_TRAJECTORY * trajectoryContribution +
-          W_HISTORICAL * historicalBaseline;
-
-        const clamped = Math.max(0, Math.min(25, predicted));
-        forecastData.push(Math.round((clamped * 10) / 10));
-
-        const decayFactor = Math.min(i / remaining, 0.6);
-        rollingBase = clamped * (1 - decayFactor) + seasonAvg * decayFactor;
-
-        labels.push(`P${n + i}`);
-      }
-
-      datasets.push({
-        label: 'Momentum Forecast',
-        data: [...Array(lastIndex).fill(null), ...forecastData],
-        borderColor: '#fbbf24',
-        borderDash: [5, 5],
-        pointRadius: 0,
-        pointHitRadius: 0,
-        fill: false,
-        tension: 0.3,
-      });
-    }
 
     return { labels, datasets };
   });
@@ -208,61 +160,70 @@ export class DriverResult {
         border: { display: false },
         grid: { color: 'rgba(255,255,255,0.04)' },
         ticks: {
-          color: '#475569',
+          color: '#64748b',
           stepSize: 5,
           font: { family: 'monospace', size: 11 },
-          callback: (value) => `${value}`,
+          callback: (value) => `${value} pts`,
         },
       },
       x: {
         grid: { display: false },
         border: { display: false },
         ticks: {
-          color: '#475569',
+          color: '#64748b',
           font: { family: 'monospace', size: 10 },
           maxRotation: 0,
           autoSkip: true,
-          maxTicksLimit: 12,
+          maxTicksLimit: 25,
         },
       },
     },
     plugins: {
       legend: {
-        display: this.selectedYear() === this.CURRENT_YEAR && this.rawResults().length > 0,
-        position: 'bottom',
+        display: true,
+        position: 'top',
         labels: {
-          color: '#64748b',
-          usePointStyle: true,
-          pointStyleWidth: 20,
-          padding: 20,
+          color: '#94a3b8',
+          boxWidth: 12,
           font: { family: 'monospace', size: 11 },
         },
       },
       tooltip: {
         enabled: this.rawResults().length > 0,
-        backgroundColor: '#0f172a',
-        titleColor: '#64748b',
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        titleColor: '#94a3b8',
         bodyColor: '#f1f5f9',
-        borderColor: 'rgba(59,130,246,0.25)',
+        borderColor: 'rgba(59, 130, 246, 0.3)',
         borderWidth: 1,
         padding: 14,
-        cornerRadius: 10,
+        cornerRadius: 12,
         displayColors: true,
         callbacks: {
-          title: (items) => `Race ${items[0].label}`,
+          title: (items) => {
+            const index = items[0].dataIndex;
+            const race = this.rawResults()[index];
+            return race ? race.raceName : `Round ${items[0].label.replace('R', '')}`;
+          },
           label: (item) => {
             const val = item.raw as number;
-            if (item.datasetIndex === 0) {
-              if (val === 0) return '   DNF / No points';
-              return `   ${val} point${val === 1 ? '' : 's'}`;
+            const index = item.dataIndex;
+            const race = this.rawResults()[index];
+            const labelName = item.dataset.label ?? '';
+
+            if (labelName === 'Race Points') {
+              const statusStr = race && race.status === 'DNF' ? ' (DNF)' : '';
+              return `   Race: ${val} pt${val === 1 ? '' : 's'}${statusStr}`;
+            } else {
+              // Only display sprint tooltip info if it was actually a sprint weekend
+              if (race && !race.isSprint) return '';
+              return `   Sprint: ${val} pt${val === 1 ? '' : 's'}`;
             }
-            return `   ${item.dataset.label}: ${val} pts`;
           },
         },
       },
     },
     elements: {
-      line: { tension: 0.35 },
+      line: { tension: 0.25 },
     },
   }));
 }

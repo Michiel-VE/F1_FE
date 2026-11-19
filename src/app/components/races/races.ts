@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs/operators';
+import { Subject, catchError, of, switchMap, tap } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { RaceService } from '../../services/race/race-service';
 import { Race } from '../../interfaces/race';
@@ -42,6 +42,7 @@ import { RaceStatus } from '../../enum/race-status';
 export class Races implements OnInit {
   private readonly raceService = inject(RaceService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly yearChanges$ = new Subject<string>();
 
   readonly selectedYear = signal<string>(new Date().getFullYear().toString());
   year: string = new Date().getFullYear().toString();
@@ -102,18 +103,53 @@ export class Races implements OnInit {
     return hints.length > 0 ? hints[hints.length - 1].id : null;
   });
 
+  constructor() {
+    this.yearChanges$
+      .pipe(
+        tap((newYear) => {
+          this.year = newYear;
+          this.selectedYear.set(newYear);
+          this.races.set([]);
+          this.pastExpanded.set(false);
+          this.isLoading.set(true);
+          this.error.set(null);
+        }),
+        switchMap((newYear) =>
+          this.raceService.getData<Race[] | null>(`f1_races_${newYear}`, newYear).pipe(
+            catchError((err: HttpErrorResponse) => {
+              if (err.status === 404 || err.status === 204) {
+                return of([] as Race[]);
+              }
+              this.error.set({
+                message: this.extractErrorMessage(err, 'Error fetching races'),
+                timestamp: new Date(),
+                canRetry: true,
+              });
+              return of(null);
+            }),
+          ),
+        ),
+        tap(() => this.isLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((data) => {
+        if (data !== null) {
+          this.races.set(Array.isArray(data) ? data : []);
+        }
+      });
+  }
+
   ngOnInit(): void {
-    this.fetchRaces();
+    this.yearChanges$.next(this.selectedYear());
   }
 
   onYearChange(newYear: string): void {
-    this.selectedYear.set(newYear);
-    this.pastExpanded.set(false);
-    this.fetchRaces();
+    if (!newYear) return;
+    this.yearChanges$.next(newYear);
   }
 
   retryFetch(): void {
-    this.fetchRaces();
+    this.yearChanges$.next(this.selectedYear());
   }
 
   togglePast(): void {
@@ -149,31 +185,6 @@ export class Races implements OnInit {
 
   getRoundNumber(race: Race): number {
     return this.roundNumbers().get(race.id) ?? 0;
-  }
-
-  private fetchRaces(): void {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    const year = this.selectedYear();
-    const cacheKey = `f1_races_${year}`;
-
-    this.raceService
-      .getData<Race[]>(cacheKey, year)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isLoading.set(false)),
-      )
-      .subscribe({
-        next: (data) => this.races.set(data || []),
-        error: (err) => {
-          this.error.set({
-            message: this.extractErrorMessage(err, 'Error fetching races'),
-            timestamp: new Date(),
-            canRetry: true,
-          });
-        },
-      });
   }
 
   private extractErrorMessage(err: HttpErrorResponse, title: string): string {

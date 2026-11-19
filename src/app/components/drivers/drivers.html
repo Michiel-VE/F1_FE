@@ -1,7 +1,7 @@
 <app-header
   title="Driver Standings"
   [selectedYear]="selectedYear()"
-  [(searchedYear)]="year"
+  [searchedYear]="selectedYear()"
   (searchedYearChange)="onYearChange($event)"
 />
 
@@ -29,47 +29,38 @@
         </div>
       }
     </div>
+  } @else if (drivers().length === 0) {
+    <div class="w-full flex flex-col items-center justify-center gap-4 py-32 text-center">
+      <div class="w-20 h-20 rounded-full bg-slate-900/60 border border-white/10 flex items-center justify-center text-slate-400 shadow-inner">
+        <svg class="w-8 h-8 opacity-70" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" />
+          <path d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <circle cx="18" cy="20" r="2" fill="currentColor" />
+          <circle cx="30" cy="20" r="2" fill="currentColor" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-white tracking-tight">No drivers found for this season</h3>
+      <p class="text-sm text-slate-400 max-w-sm">There is no telemetry data available for this selection. Try choosing a different calendar year.</p>
+    </div>
   } @else {
-    @if (drivers().length === 0) {
-      <div class="w-full flex flex-col items-center justify-center gap-4 py-32 text-center">
-        <div class="w-20 h-20 rounded-full bg-slate-900/60 border border-white/10 flex items-center justify-center text-slate-400 shadow-inner">
-          <svg class="w-8 h-8 opacity-70" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" />
-            <path d="M16 30c2-3.5 5-5 8-5s6 1.5 8 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            <circle cx="18" cy="20" r="2" fill="currentColor" />
-            <circle cx="30" cy="20" r="2" fill="currentColor" />
-          </svg>
+    <div class="space-y-8">
+      <!-- PODIUM TIER (Top 3 Drivers Highlighted) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        @for (driver of drivers().slice(0, 3); track driver.driverId; let idx = $index) {
+          <app-driver [driver]="driver" [position]="idx + 1" [searchedYear]="selectedYear()" />
+        }
+      </div>
+
+      <!-- REMAINING DRIVERS TIER (4th place onwards in a Bento Grid) -->
+      @if (drivers().length > 3) {
+        <div class="pt-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            @for (driver of drivers().slice(3); track driver.driverId; let idx = $index) {
+              <app-driver [driver]="driver" [position]="idx + 4" [searchedYear]="selectedYear()" />
+            }
+          </div>
         </div>
-        <h3 class="text-xl font-semibold text-white tracking-tight">No drivers found for this season</h3>
-        <p class="text-sm text-slate-400 max-w-sm">There is no telemetry data available for this selection. Try choosing a different calendar year.</p>
-      </div>
-    } @else {
-      <!-- MODERN LAYOUT: Top Podium Showcase for Top 3, Grid for the Rest -->
-      <div class="space-y-8">
-        
-        <!-- PODIUM TIER (Top 3 Drivers Highlighted) -->
-        @if (drivers().length > 0) {
-          <div>            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              @for (driver of drivers().slice(0, 3); track driver.driverId; let idx = $index) {
-                <app-driver [driver]="driver" [position]="idx + 1" [searchedYear]="selectedYear()" />
-              }
-            </div>
-          </div>
-        }
-
-        <!-- REMAINING DRIVERS TIER (4th place onwards in a clean Bento Grid) -->
-        @if (drivers().length > 3) {
-          <div class="pt-4">            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              @for (driver of drivers().slice(3); track driver.driverId; let idx = $index) {
-                <app-driver [driver]="driver" [position]="idx + 4" [searchedYear]="selectedYear()" />
-              }
-            </div>
-          </div>
-        }
-
-      </div>
-    }
+      }
+    </div>
   }
 </section>

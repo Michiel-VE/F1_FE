@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
-  output,
   model,
 } from '@angular/core';
 import { Search } from '../search/search';
@@ -19,9 +18,7 @@ export class Header {
   selectedYear = input<string>(new Date().getFullYear().toString());
   searchedYear = model<string>(new Date().getFullYear().toString());
 
-  searchedYearChange = output<string>();
-
   onYearChange(year: string): void {
-    this.searchedYearChange.emit(year);
+    this.searchedYear.set(year);
   }
 }
