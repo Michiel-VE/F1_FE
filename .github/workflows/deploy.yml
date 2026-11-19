@@ -25,7 +25,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: opc
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "Dockerfile,package.json,package-lock.json,angular.json,tsconfig*.json,src"
+          source: "Dockerfile,package.json,package-lock.json,angular.json,tsconfig*.json,.postcssrc.json,public,src"
           target: "/home/opc/app"
           rm: true
 
