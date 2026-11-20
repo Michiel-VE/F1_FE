@@ -1,60 +1,68 @@
 <section class="relative min-h-screen bg-[#050505] text-gray-100 overflow-hidden font-sans selection:bg-red-600/30">
-  <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-  
-  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-red-600/10 blur-[120px] pointer-events-none"></div>
+  <div
+    class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]">
+  </div>
+
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-red-600/10 blur-[120px] pointer-events-none">
+  </div>
 
   <div class="relative max-w-6xl mx-auto px-6 py-24">
     <header class="max-w-3xl mb-24">
       <div class="h-1 w-12 bg-red-600 mb-8"></div>
-      
+
       <h1 class="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.85] mb-8 uppercase">
-        F1 Data <span class="text-red-600">Collection</span><br/>
+        F1 Data <span class="text-red-600">Collection</span><br />
         Interface
       </h1>
-      
+
       <p class="text-gray-400 text-lg leading-relaxed max-w-2xl font-light">
-        The ultimate telemetry and historical archive for Formula 1. 
+        The ultimate telemetry and historical archive for Formula 1.
         Access comprehensive statistics through a custom-built interface.
       </p>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       @for (item of endpoints(); track item.title) {
-        <div
-          class="group relative flex flex-col justify-between p-10 rounded-2xl bg-[#0a0a0a] border border-white/5 
+      <div class="group relative flex flex-col justify-between p-10 rounded-2xl bg-[#0a0a0a] border border-white/5 
                  hover:border-red-600/50 hover:shadow-[0_0_30px_-10px_rgba(220,38,38,0.3)] 
-                 transition-all duration-500 overflow-hidden cursor-default"
-        >
-          <div class="absolute inset-0 border-2 border-transparent group-hover:border-red-600/20 rounded-2xl transition-colors duration-500 pointer-events-none"></div>
-          
-          <div class="absolute -inset-px bg-gradient-to-br from-red-600/[0.08] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
-          <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-500/0 to-transparent group-hover:via-red-500/40 transition-all duration-700"></div>
-
-          <div class="relative z-10">
-            <h2 class="text-3xl font-bold mb-4 text-white tracking-tight group-hover:text-red-50 transition-colors duration-300">
-              {{ item.title }}
-            </h2>
-            
-            <p class="text-gray-500 text-base leading-relaxed mb-10 group-hover:text-gray-300 transition-colors duration-300">
-              {{ item.desc }}
-            </p>
-          </div>
-
-          <div class="relative z-10 mt-auto">
-            <a
-              [routerLink]="item.linkTo ? [item.linkTo] : null"
-              class="inline-flex items-center gap-4 py-3.5 px-8 cursor-pointer rounded-lg bg-white/5 border border-white/10 text-[0.7rem] font-bold tracking-[0.2em] uppercase 
-                     hover:bg-red-600 hover:border-red-600 hover:text-white hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] 
-                     active:scale-95 transition-all duration-300"
-            >
-              {{ item.btn }}
-              <svg class="w-3 h-3 translate-x-0 group-hover/btn:translate-x-1 transition-transform" viewBox="0 0 16 16" fill="none">
-                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </a>
-          </div>
+                 transition-all duration-500 overflow-hidden cursor-default">
+        <div
+          class="absolute inset-0 border-2 border-transparent group-hover:border-red-600/20 rounded-2xl transition-colors duration-500 pointer-events-none">
         </div>
+
+        <div
+          class="absolute -inset-px bg-gradient-to-br from-red-600/[0.08] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        </div>
+
+        <div
+          class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-500/0 to-transparent group-hover:via-red-500/40 transition-all duration-700">
+        </div>
+
+        <div class="relative z-10">
+          <h2
+            class="text-3xl font-bold mb-4 text-white tracking-tight group-hover:text-red-50 transition-colors duration-300">
+            {{ item.title }}
+          </h2>
+
+          <p
+            class="text-gray-500 text-base leading-relaxed mb-10 group-hover:text-gray-300 transition-colors duration-300">
+            {{ item.desc }}
+          </p>
+        </div>
+
+        <div class="relative z-10 mt-auto">
+          <a [routerLink]="item.linkTo ? [item.linkTo] : null" class="inline-flex items-center gap-4 py-3.5 px-8 cursor-pointer rounded-lg bg-white/5 border border-white/10 text-[0.7rem] font-bold tracking-[0.2em] uppercase 
+                     hover:bg-red-600 hover:border-red-600 hover:text-white hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] 
+                     active:scale-95 transition-all duration-300">
+            {{ item.btn }}
+            <svg class="w-3 h-3 translate-x-0 group-hover/btn:translate-x-1 transition-transform" viewBox="0 0 16 16"
+              fill="none">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
       }
     </div>
 
@@ -65,6 +73,12 @@
           <a href="https://michielve.be" target="_blank" class="hover:text-red-500 transition-colors">michielve.be</a>
         </span>
       </div>
+
+      <div class="flex items-center gap-6 text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-500">
+        <a routerLink="/privacy-policy" class="hover:text-red-500 transition-colors">Privacy Policy</a>
+        <a routerLink="/terms-of-service" class="hover:text-red-500 transition-colors">Terms of Service</a>
+      </div>
+
       <p class="text-[0.65rem] text-gray-600 font-bold tracking-[0.2em] uppercase text-center sm:text-right">
         © {{ currentYear() }} // Formula 1 Amateur Archive
       </p>

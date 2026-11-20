@@ -17,6 +17,16 @@ export const routes: Routes = [
     loadComponent: () => import('./components/races/races').then((m) => m.Races),
   },
   {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./components/legal/privacy-policy/privacy-policy').then((m) => m.PrivacyPolicy),
+  },
+  {
+    path: 'terms-of-service',
+    loadComponent: () =>
+      import('./components/legal/terms-of-service/terms-of-service').then((m) => m.TermsOfService),
+  },
+  {
     path: 'prediction',
     canActivate: [authGuard],
     children: [

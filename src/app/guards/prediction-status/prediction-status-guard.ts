@@ -10,25 +10,15 @@ export const personalPredictionGuard: CanActivateFn = (route: ActivatedRouteSnap
 
   const poolId = route.paramMap.get('poolId');
 
-  if (poolId) {
-    return predictionService.getSavedPrediction(poolId).pipe(
-      map((prediction) => {
-        if (prediction?.predictedTeams?.length) {
-          return router.createUrlTree(['/prediction/view', poolId]);
-        }
-        return true;
-      }),
-      catchError(() => of(true))
-    );
-  }
-
-  return predictionService.getPredictionStatus().pipe(
-    map((status) => {
-      if (status?.hasPersonalPrediction) {
-        return router.createUrlTree(['/prediction/view']);
+  return predictionService.getSavedPrediction(poolId).pipe(
+    map((prediction) => {
+      if (prediction?.predictedTeams?.length) {
+        return poolId
+          ? router.createUrlTree(['/prediction/view', poolId])
+          : router.createUrlTree(['/prediction/view']);
       }
       return true;
     }),
-    catchError(() => of(true))
+    catchError(() => of(true)),
   );
 };

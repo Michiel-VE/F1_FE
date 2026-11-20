@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment';
 export class PredictionService {
   private http = inject(HttpClient);
   private teamService = inject(TeamService);
-  
+
   private apiPredictionsUrl = `${environment.baseUrl}/predictions`;
 
   getPredictionStatus(): Observable<{ hasPools: boolean; hasPersonalPrediction: boolean }> {

@@ -46,8 +46,8 @@ export class PredictionView implements OnInit {
   readonly showLeaveConfirm = signal<boolean>(false);
 
   readonly currentUserId = computed(() => this.authService.currentUser()?.id ?? null);
-  readonly isCreator = computed(() =>
-    !!this.poolCreatorId() && this.poolCreatorId() === this.currentUserId()
+  readonly isCreator = computed(
+    () => !!this.poolCreatorId() && this.poolCreatorId() === this.currentUserId(),
   );
 
   readonly title = computed(() =>
@@ -60,13 +60,13 @@ export class PredictionView implements OnInit {
   );
 
   readonly actualStandings = computed(() =>
-    [...this.allTeams()].sort((a, b) => b.totalPoints - a.totalPoints)
+    [...this.allTeams()].sort((a, b) => b.totalPoints - a.totalPoints),
   );
 
   readonly scoredTeams = computed(() => this.scoreTeams(this.savedTeams()));
 
   readonly totalScore = computed(() =>
-    this.scoredTeams().reduce((sum, s) => sum + s.points, 0)
+    this.scoredTeams().reduce((sum, s) => sum + s.points, 0),
   );
 
   readonly maxScore = computed(() => this.savedTeams().length * 5);
@@ -77,13 +77,15 @@ export class PredictionView implements OnInit {
 
     const requests: any = {
       teams: this.predictionService.getTeamsForPrediction<Team[]>(),
-      savedPrediction: this.predictionService.getSavedPrediction(poolId),
+      savedPrediction: this.predictionService
+        .getSavedPrediction(poolId)
+        .pipe(catchError(() => of(null))),
     };
 
     if (poolId) {
-      requests.poolDetails = this.predictionService.getPoolDetails(poolId).pipe(
-        catchError(() => of(null))
-      );
+      requests.poolDetails = this.predictionService
+        .getPoolDetails(poolId)
+        .pipe(catchError(() => of(null)));
     }
 
     forkJoin(requests).subscribe({
@@ -91,34 +93,40 @@ export class PredictionView implements OnInit {
         const verifiedTeams = teams ?? [];
         this.allTeams.set(verifiedTeams);
 
-        if (savedPrediction?.predictedTeams?.length) {
-          const orderedList: Team[] = savedPrediction.predictedTeams
-            .map((id: string) => verifiedTeams.find((t: Team) => t.id === id))
-            .filter((t: Team | undefined): t is Team => !!t);
-          this.savedTeams.set(orderedList);
+        const orderedList: Team[] = (savedPrediction?.predictedTeams ?? [])
+          .map((id: string) => verifiedTeams.find((t: Team) => t.id === id))
+          .filter((t: Team | undefined): t is Team => !!t);
+
+        if (!poolId && orderedList.length === 0) {
+          this.router.navigate(['/prediction/editor']);
+          return;
         }
+
+        this.savedTeams.set(orderedList);
 
         if (poolDetails) {
           this.poolCreatorId.set(poolDetails.creatorId ?? null);
 
           if (poolDetails.leaderBoard) {
-            const scores: MemberScore[] = poolDetails.leaderBoard.map((member: any) => {
-              const memberTeams: Team[] = (member.predictedTeamIds ?? [])
-                .map((id: string) => verifiedTeams.find((t: Team) => t.id === id))
-                .filter((t: Team | undefined): t is Team => !!t);
+            const scores: MemberScore[] = poolDetails.leaderBoard
+              .map((member: any) => {
+                const memberTeams: Team[] = (member.predictedTeamIds ?? [])
+                  .map((id: string) => verifiedTeams.find((t: Team) => t.id === id))
+                  .filter((t: Team | undefined): t is Team => !!t);
 
-              const scored = this.scoreTeams(memberTeams);
-              const total = scored.reduce((sum, s) => sum + s.points, 0);
+                const scored = this.scoreTeams(memberTeams);
+                const total = scored.reduce((sum, s) => sum + s.points, 0);
 
-              return {
-                userId: member.userId,
-                username: member.username,
-                picture: member.picture,
-                totalScore: total,
-                scoredTeams: scored,
-                expanded: false,
-              };
-            }).sort((a: MemberScore, b: MemberScore) => b.totalScore - a.totalScore);
+                return {
+                  userId: member.userId,
+                  username: member.username,
+                  picture: member.picture,
+                  totalScore: total,
+                  scoredTeams: scored,
+                  expanded: false,
+                };
+              })
+              .sort((a: MemberScore, b: MemberScore) => b.totalScore - a.totalScore);
 
             this.memberScores.set(scores);
           }
@@ -131,17 +139,22 @@ export class PredictionView implements OnInit {
   private scoreTeams(teams: Team[]): ScoredEntry[] {
     const actual = this.actualStandings();
     return teams.map((team, predictedIndex) => {
-      const actualIndex = actual.findIndex(t => t.id === team.id);
+      const actualIndex = actual.findIndex((t) => t.id === team.id);
       const diff = Math.abs(predictedIndex - actualIndex);
       const points = diff === 0 ? 5 : diff === 1 ? 3 : diff === 2 ? 1 : 0;
-      return { team, predictedPosition: predictedIndex + 1, actualPosition: actualIndex + 1, points };
+      return {
+        team,
+        predictedPosition: predictedIndex + 1,
+        actualPosition: actualIndex + 1,
+        points,
+      };
     });
   }
 
   toggleMember(index: number): void {
-    this.memberScores.update(scores => scores.map((s, i) =>
-      i === index ? { ...s, expanded: !s.expanded } : s
-    ));
+    this.memberScores.update((scores) =>
+      scores.map((s, i) => (i === index ? { ...s, expanded: !s.expanded } : s)),
+    );
   }
 
   leavePool(): void {
@@ -165,16 +178,17 @@ export class PredictionView implements OnInit {
 
     this.predictionService.leavePool(poolId).subscribe({
       next: () => {
-        const successMessage = isCreatorLeaving 
-          ? 'Group was successfully deleted.' 
+        const successMessage = isCreatorLeaving
+          ? 'Group was successfully deleted.'
           : 'Successfully left the group.';
         this.toastService.show(successMessage, 'success');
         this.router.navigate(['/prediction']);
       },
       error: (err: any) => {
-        const errorMessage = err.error?.error || err.error?.message || 'Failed to process request.';
+        const errorMessage =
+          err.error?.error || err.error?.message || 'Failed to process request.';
         this.toastService.show(errorMessage, 'error');
-      }
+      },
     });
   }
 
@@ -183,13 +197,13 @@ export class PredictionView implements OnInit {
     if (!poolId) return;
     this.predictionService.kickMember(poolId, userId).subscribe({
       next: () => {
-        this.memberScores.update(scores => scores.filter(s => s.userId !== userId));
+        this.memberScores.update((scores) => scores.filter((s) => s.userId !== userId));
         this.toastService.show('Member successfully removed.', 'success');
       },
       error: (err: any) => {
         const errorMessage = err.error?.error || err.error?.message || 'Failed to kick member.';
         this.toastService.show(errorMessage, 'error');
-      }
+      },
     });
   }
 

@@ -5,7 +5,8 @@ import { PredictionHeader } from '../../common/prediction-header/prediction-head
 import { WorkspaceItem } from '../../../interfaces/pool';
 import { PredictionService } from '../../../services/prediction/prediction-service';
 import { AuthService } from '../../../services/auth/auth-service';
-import { switchMap, of } from 'rxjs';
+import { of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { ToastService } from '../../../services/toast/toast-service';
 
 @Component({
@@ -37,8 +38,17 @@ export class PoolDashboard implements OnInit {
 
     this.predictionService.getPredictionStatus().subscribe({
       next: (status) => {
-        if (!status.hasPools && !status.hasPersonalPrediction) {
-          this.router.navigate(['/prediction/editor']);
+        if (!status.hasPools) {
+          this.predictionService
+            .getSavedPrediction(null)
+            .pipe(catchError(() => of(null)))
+            .subscribe((personalPred) => {
+              if (!personalPred?.predictedTeams?.length) {
+                this.router.navigate(['/prediction/editor']);
+                return;
+              }
+              this.loadWorkspaces();
+            });
           return;
         }
         this.loadWorkspaces();
@@ -46,7 +56,7 @@ export class PoolDashboard implements OnInit {
       error: (err: any) => {
         console.error('Failed verification checkpoint lookup', err);
         this.loadWorkspaces();
-      }
+      },
     });
   }
 
@@ -73,35 +83,39 @@ export class PoolDashboard implements OnInit {
         this.workspaces.set(list);
         this.isLoading.set(false);
       },
-      error: (err: any) => {
+      error: () => {
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
   navigateToWorkspace(item: WorkspaceItem): void {
     if (item.id === null) {
-      this.predictionService.getPredictionStatus().pipe(
-        switchMap((status) => {
-          if (status.hasPersonalPrediction) {
-            this.router.navigate(['/prediction/view']);
-          } else {
-            this.router.navigate(['/prediction/editor']);
-          }
-          return of(null);
-        })
-      ).subscribe();
+      this.predictionService
+        .getSavedPrediction(null)
+        .pipe(
+          catchError(() => of(null)),
+          switchMap((prediction) => {
+            if (prediction?.predictedTeams?.length) {
+              this.router.navigate(['/prediction/view']);
+            } else {
+              this.router.navigate(['/prediction/editor']);
+            }
+            return of(null);
+          }),
+        )
+        .subscribe();
     } else {
-      this.predictionService.getSavedPrediction(item.id).subscribe({
-        next: (prediction) => {
+      this.predictionService
+        .getSavedPrediction(item.id)
+        .pipe(catchError(() => of(null)))
+        .subscribe((prediction) => {
           if (prediction?.predictedTeams?.length) {
             this.router.navigate(['/prediction/view', item.id]);
           } else {
             this.router.navigate(['/prediction/editor', item.id]);
           }
-        },
-        error: () => this.router.navigate(['/prediction/editor', item.id])
-      });
+        });
     }
   }
 
@@ -118,9 +132,15 @@ export class PoolDashboard implements OnInit {
     });
   }
 
-  openCreateModal(): void { this.activeModal.set('create'); }
-  openJoinModal(): void { this.activeModal.set('join'); }
-  closeModal(): void { this.activeModal.set('none'); }
+  openCreateModal(): void {
+    this.activeModal.set('create');
+  }
+  openJoinModal(): void {
+    this.activeModal.set('join');
+  }
+  closeModal(): void {
+    this.activeModal.set('none');
+  }
 
   submitModalAction(value: string): void {
     if (!value?.trim()) return;
@@ -128,21 +148,23 @@ export class PoolDashboard implements OnInit {
 
     if (this.activeModal() === 'create') {
       this.predictionService.createPool(sanitizedValue).subscribe({
-        next: () => { 
-          this.closeModal(); 
+        next: () => {
+          this.closeModal();
           this.checkNavigationAndLoad();
           this.toastService.show('Group successfully created.', 'success');
         },
-        error: (err: any) => this.toastService.show(err.error?.error || 'Failed to create group.', 'error')
+        error: (err: any) =>
+          this.toastService.show(err.error?.error || 'Failed to create group.', 'error'),
       });
     } else if (this.activeModal() === 'join') {
       this.predictionService.joinPool(sanitizedValue).subscribe({
-        next: () => { 
-          this.closeModal(); 
+        next: () => {
+          this.closeModal();
           this.checkNavigationAndLoad();
           this.toastService.show('Successfully joined group.', 'success');
         },
-        error: (err: any) => this.toastService.show(err.error?.error || 'Invalid invite code.', 'error')
+        error: (err: any) =>
+          this.toastService.show(err.error?.error || 'Invalid invite code.', 'error'),
       });
     }
   }
