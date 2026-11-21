@@ -195,6 +195,18 @@
         </div>
       </div>
 
+      @if (!currentPoolId() && previewScoredEntries().length > 0) {
+        <div class="mt-4 shrink-0">
+          <app-scored-prediction-accordion
+            [entries]="previewScoredEntries()"
+            [maxScore]="previewMaxScore()"
+            [title]="'Live Score Breakdown'"
+            [totalScore]="previewTotalScore()"
+            [defaultOpen]="true"
+          />
+        </div>
+      }
+
       @if (rankedSelection().length === allTeams().length && allTeams().length > 0) {
         <div class="mt-6 shrink-0 pt-2 border-t border-white/5">
           <button
@@ -234,14 +246,14 @@
       <h3 class="text-white font-black uppercase italic tracking-tighter text-xl mb-4 border-l-4 border-red-600 pl-3">
         {{ activeModal() === 'create' ? 'Create Group Prediction' : 'Join Existing Group' }}
       </h3>
-      
+
       <div class="mb-6">
         <label class="block text-[0.6rem] text-gray-500 font-bold uppercase tracking-widest mb-2">
           {{ activeModal() === 'create' ? 'Championship Name' : 'Invite Code' }}
         </label>
-        <input 
+        <input
           #modalInput
-          type="text" 
+          type="text"
           [placeholder]="activeModal() === 'create' ? 'e.g., Paddock Club Elite' : 'e.g., ABC123XYZ'"
           class="w-full bg-white/5 border border-white/10 p-3 text-white font-bold text-sm uppercase tracking-wider focus:outline-hidden focus:border-red-600 transition-colors"
           (keyup.enter)="submitModalAction(modalInput.value)"

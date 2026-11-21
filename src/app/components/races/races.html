@@ -1,109 +1,87 @@
-<app-header
-  title="Race Calendar"
-  [selectedYear]="selectedYear()"
-  [(searchedYear)]="year"
-  (searchedYearChange)="onYearChange($event)"
-/>
+<app-header title="Race Calendar" [selectedYear]="selectedYear()" [(searchedYear)]="year"
+  (searchedYearChange)="onYearChange($event)" />
 
 <app-error [error]="error()" (retry)="retryFetch()" />
 
-@if (isCurrentYear() && !isLoading() && nextUpRace()) {
-  <div class="mx-4 sm:mx-12 mb-6">
-    <div class="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3">
-      <div class="flex-shrink-0 w-1.5 h-8 rounded-full bg-red-500"></div>
-      <div class="flex flex-col min-w-0">
-        <span class="text-[0.6rem] font-semibold tracking-[0.18em] uppercase text-red-500">Next Up</span>
-        <span class="text-sm font-bold text-white truncate">{{ nextUpRace()!.name }}</span>
-      </div>
-      <div class="ml-auto flex-shrink-0 text-right">
-        <span class="text-[0.7rem] text-gray-400">
-          {{ nextUpRace()!.startDay | date: 'd MMM' }}
-          @if (nextUpRace()!.startDay !== nextUpRace()!.endDay) { – {{ nextUpRace()!.endDay | date: 'd MMM' }} }
-        </span>
-        <p class="text-[0.65rem] text-gray-600">{{ nextUpRace()!.country }}</p>
-      </div>
+@if (isCurrentYear() && !isLoading() && nextUpRace() && !isCurrentRace(nextUpRace()!)) {
+<div class="mx-4 sm:mx-12 lg:mx-28 mb-5">
+  <div
+    class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-lg bg-white/[0.04] border border-white/10">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <span
+        class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider rounded bg-red-500/15 text-red-400 border border-red-500/25 shrink-0">
+        Next Up
+      </span>
+      <span class="text-sm font-semibold text-white truncate">
+        {{ nextUpRace()!.name }}
+      </span>
+      <span class="hidden sm:inline text-xs text-zinc-400 truncate">
+        · {{ nextUpRace()!.country }}
+      </span>
     </div>
+    <span class="text-xs font-medium text-zinc-200 tabular-nums shrink-0">
+      {{ nextUpRace()!.startDay | date: 'd MMM' }}
+      @if (nextUpRace()!.startDay !== nextUpRace()!.endDay) { – {{ nextUpRace()!.endDay | date: 'd MMM' }} }
+    </span>
   </div>
+</div>
 }
 
-<section class="mx-4 sm:mx-36 pt-4 pb-12">
+<section class="mx-4 sm:mx-12 lg:mx-28 pb-14">
   @if (isLoading()) {
-    <div class="flex flex-col gap-3">
-      @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
-        <div class="flex gap-4 items-center animate-pulse">
-          <div class="w-10 sm:w-12 flex flex-col items-center gap-1 flex-shrink-0">
-            <div class="h-3 bg-white/[0.06] rounded w-8"></div>
-            <div class="h-4 bg-white/[0.06] rounded w-6"></div>
-          </div>
-          <div class="w-px self-stretch bg-white/[0.06] flex-shrink-0"></div>
-          <div class="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 flex gap-4">
-            <div class="flex flex-col gap-2 flex-1">
-              <div class="h-3 bg-white/[0.06] rounded w-1/4"></div>
-              <div class="h-5 bg-white/[0.06] rounded w-3/4"></div>
-            </div>
-          </div>
-        </div>
-      }
+  <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06]">
+    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+    <div class="px-4 py-3.5 flex items-center justify-between gap-4 animate-pulse">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <div class="h-3.5 w-14 bg-white/[0.07] rounded"></div>
+        <div class="h-4 w-48 max-w-full bg-white/[0.07] rounded"></div>
+      </div>
+      <div class="h-5 w-20 bg-white/[0.06] rounded-full"></div>
     </div>
+    }
+  </div>
   } @else {
-    <div class="flex flex-col">
-      @for (race of visibleRaces(); track race.id; let last = $last) {
-        @if (isCurrentYear() && isPast(race) && race.id !== lastHintRaceId() && pastExpanded()) {
-          <div @slideInOut>
-            <app-race-card
-              [race]="race"
-              [roundNumber]="getRoundNumber(race)"
-              [isCurrent]="isCurrentRace(race)"
-              [isUpcoming]="isUpcoming(race)"
-              [isPast]="isPast(race)"
-              [isLast]="false"
-              [dimPast]="true"
-            />
-          </div>
-        } @else {
-          <app-race-card
-            [race]="race"
-            [roundNumber]="getRoundNumber(race)"
-            [isCurrent]="isCurrentRace(race)"
-            [isUpcoming]="isUpcoming(race)"
-            [isPast]="isPast(race)"
-            [isLast]="last && hiddenPastCount() === 0"
-            [dimPast]="isCurrentYear()"
-          />
-        }
-
-        @if (isCurrentYear() && !pastExpanded() && hiddenPastCount() > 0 && race.id === lastHintRaceId()) {
-          <div class="flex justify-center w-full py-4">
-            <button
-              (click)="togglePast()"
-              class="flex items-center justify-center gap-3 px-6 py-2 text-[0.7rem] font-bold tracking-widest uppercase text-gray-400 border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:text-white rounded-full transition-all cursor-pointer"
-            >
-              <svg class="w-3 h-3" viewBox="0 0 16 16" fill="none">
-                <path d="M8 12L3 6h10l-5 6z" fill="currentColor" />
-              </svg>
-              Show {{ hiddenPastCount() }} completed races
-            </button>
-          </div>
-        }
-
-        @if (isCurrentYear() && pastExpanded() && pastCount() > 1 && race.id === pastRaces()[pastRaces().length - 1].id) {
-          <div class="flex justify-center w-full py-4">
-            <button
-              (click)="togglePast()"
-              class="flex items-center justify-center gap-3 px-6 py-2 text-[0.7rem] font-bold tracking-widest uppercase text-gray-400 border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:text-white rounded-full transition-all cursor-pointer"
-            >
-              <svg class="w-3 h-3" viewBox="0 0 16 16" fill="none">
-                <path d="M8 4l5 6H3l5-6z" fill="currentColor" />
-              </svg>
-              Hide completed races
-            </button>
-          </div>
-        }
-      } @empty {
-        <div class="flex flex-col items-center gap-3 py-20 text-center">
-          <p class="text-xl font-bold text-gray-400">No races scheduled</p>
-        </div>
-      }
+  <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.06] overflow-hidden">
+    @for (race of visibleRaces(); track race.id; let last = $last) {
+    @if (isCurrentYear() && isPast(race) && race.id !== lastHintRaceId() && pastExpanded()) {
+    <div @slideInOut>
+      <app-race-card [race]="race" [roundNumber]="getRoundNumber(race)" [isCurrent]="isCurrentRace(race)"
+        [isUpcoming]="isUpcoming(race)" [isPast]="isPast(race)" [isLast]="false" [dimPast]="true" />
     </div>
+    } @else {
+    <app-race-card [race]="race" [roundNumber]="getRoundNumber(race)" [isCurrent]="isCurrentRace(race)"
+      [isUpcoming]="isUpcoming(race)" [isPast]="isPast(race)" [isLast]="last && hiddenPastCount() === 0"
+      [dimPast]="isCurrentYear()" />
+    }
+
+    @if (isCurrentYear() && !pastExpanded() && hiddenPastCount() > 0 && race.id === lastHintRaceId()) {
+    <div class="px-4 py-3 bg-white/[0.015] flex justify-center">
+      <button type="button" (click)="togglePast()"
+        class="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-full transition-colors cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" viewBox="0 0 16 16" fill="none">
+          <path d="M8 12L3 6h10l-5 6z" fill="currentColor" />
+        </svg>
+        <span>Show {{ hiddenPastCount() }} completed races</span>
+      </button>
+    </div>
+    }
+
+    @if (isCurrentYear() && pastExpanded() && pastCount() > 1 && race.id === pastRaces()[pastRaces().length - 1].id) {
+    <div class="px-4 py-3 bg-white/[0.015] flex justify-center">
+      <button type="button" (click)="togglePast()"
+        class="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-full transition-colors cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" viewBox="0 0 16 16" fill="none">
+          <path d="M8 4l5 6H3l5-6z" fill="currentColor" />
+        </svg>
+        <span>Hide completed races</span>
+      </button>
+    </div>
+    }
+    } @empty {
+    <div class="py-16 px-6 text-center">
+      <p class="text-base font-semibold text-zinc-300">No races scheduled</p>
+    </div>
+    }
+  </div>
   }
 </section>

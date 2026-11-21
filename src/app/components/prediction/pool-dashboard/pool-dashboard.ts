@@ -36,8 +36,29 @@ export class PoolDashboard implements OnInit {
   checkNavigationAndLoad(): void {
     this.isLoading.set(true);
 
-    this.predictionService.getPredictionStatus().subscribe({
-      next: (status) => {
+    this.authService
+      .checkAuth()
+      .pipe(
+        switchMap((isAuth) => {
+          this.currentUserId.set(this.authService.currentUser()?.id ?? null);
+          if (!isAuth) {
+            this.isLoading.set(false);
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            return of(null);
+          }
+          return this.predictionService.getPredictionStatus().pipe(
+            catchError((err: any) => {
+              console.error('Failed verification checkpoint lookup', err);
+              return of(null);
+            }),
+          );
+        }),
+      )
+      .subscribe((status) => {
+        if (!status) {
+          this.isLoading.set(false);
+          return;
+        }
         if (!status.hasPools) {
           this.predictionService
             .getSavedPrediction(null)
@@ -52,12 +73,7 @@ export class PoolDashboard implements OnInit {
           return;
         }
         this.loadWorkspaces();
-      },
-      error: (err: any) => {
-        console.error('Failed verification checkpoint lookup', err);
-        this.loadWorkspaces();
-      },
-    });
+      });
   }
 
   loadWorkspaces(): void {

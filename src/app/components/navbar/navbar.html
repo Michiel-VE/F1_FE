@@ -1,264 +1,165 @@
-<nav
-  class="fixed top-0 z-50 w-full bg-black/80 backdrop-blur-md border-b border-white/5 selection:bg-red-600/30"
->
-  <div class="max-w-7xl mx-auto px-6 lg:px-8">
-    <div class="flex justify-between h-20 items-center">
-      <a routerLink="/" class="group flex items-center gap-2">
-        <div
-          class="w-1.5 h-6 bg-red-600 -skew-x-12 group-hover:scale-y-110 transition-transform duration-300"
-        ></div>
-        <span class="text-white font-black text-2xl tracking-tighter uppercase">
-          F1<span class="text-red-600">_</span>API
-        </span>
-      </a>
+<header
+  class="sticky top-0 z-50 h-16 bg-[#05070a]/95 backdrop-blur-md border-b border-white/[0.08] text-zinc-100 selection:bg-red-500/30">
+  <nav aria-label="Primary navigation"
+    class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-6">
+    <!-- Brand -->
+    <a routerLink="/"
+      class="inline-flex items-center gap-2.5 text-white font-bold text-base tracking-tight shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
+      <span class="w-2 h-2 rounded-full bg-red-500" aria-hidden="true"></span>
+      <span>F1<span class="text-red-400">_</span>DATA</span>
+    </a>
 
-      <!-- Desktop Links System -->
-      <ul class="hidden md:flex items-center space-x-1 h-full">
+    <!-- Right-Aligned Links & Profile -->
+    <div class="hidden md:flex items-center justify-end gap-6 ml-auto">
+      <ul class="flex items-center gap-1">
         @for (link of visibleLinks(); track link.name) {
-          <li class="relative flex items-center h-full">
-            @if (link.children) {
-              <button
-                (click)="toggleDropdown(link.name)"
-                class="inline-flex items-center gap-2 px-4 py-2 text-[0.7rem] font-bold tracking-[0.25em] uppercase text-gray-500 hover:text-white transition-all duration-300 outline-none cursor-pointer"
-                [class.text-white]="activeDropdown() === link.name"
-              >
-                <span>{{ link.name }}</span>
-                <svg
-                  class="w-3 h-3 transition-transform duration-300 -mr-1"
-                  [class.rotate-180]="activeDropdown() === link.name"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="3"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
+        <li class="relative">
+          @if (link.children) {
+          <button type="button" (click)="toggleDropdown(link.name)"
+            [attr.aria-expanded]="activeDropdown() === link.name"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium text-zinc-400 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 transition-colors cursor-pointer"
+            [class.text-white]="activeDropdown() === link.name">
+            <span>{{ link.name }}</span>
+            <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-150"
+              [class.rotate-180]="activeDropdown() === link.name" aria-hidden="true" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
 
-              <div
-                class="absolute left-4 top-[75%] w-64 bg-black/95 border border-white/10 backdrop-blur-xl rounded-sm shadow-2xl transition-all duration-300 origin-top-left"
-                [class.opacity-100]="activeDropdown() === link.name"
-                [class.visible]="activeDropdown() === link.name"
-                [class.scale-100]="activeDropdown() === link.name"
-                [class.opacity-0]="activeDropdown() !== link.name"
-                [class.invisible]="activeDropdown() !== link.name"
-                [class.scale-95]="activeDropdown() !== link.name"
-              >
-                <div class="py-2">
-                  @for (sub of link.children; track sub.name) {
-                    <a
-                      [routerLink]="sub.path"
-                      (click)="activeDropdown.set(null)"
-                      class="block px-6 py-3 text-[0.7rem] font-black uppercase italic tracking-tighter text-gray-400 hover:text-white hover:bg-red-600/10 transition-all"
-                    >
-                      {{ sub.name }}
-                    </a>
-                  }
-                </div>
-              </div>
-            } @else {
-              <a
-                [routerLink]="link.path"
-                routerLinkActive="text-white after:scale-x-100"
-                class="relative px-4 py-2 text-[0.7rem] font-bold tracking-[0.25em] uppercase text-gray-500 hover:text-white transition-all duration-300 after:content-[''] after:absolute after:bottom-0 after:left-4 after:right-4 after:h-[2px] after:bg-red-600 after:scale-x-0 after:transition-transform after:duration-500 hover:after:scale-x-100"
-              >
-                {{ link.name }}
-              </a>
+          @if (activeDropdown() === link.name) {
+          <div role="menu"
+            class="absolute right-0 top-full mt-2 w-56 rounded-lg bg-[#080b10] border border-white/12 shadow-xl shadow-black/60 py-1 z-50">
+            @for (sub of link.children; track sub.name) {
+            <a role="menuitem" [routerLink]="sub.path" (click)="activeDropdown.set(null)"
+              class="block px-3.5 py-2 text-[13px] font-medium text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors">
+              {{ sub.name }}
+            </a>
             }
-          </li>
-        }
-
-        <!-- Profile Menu Section -->
-        @if (isUserAuth()) {
-          <li class="relative flex items-center h-full pl-3">
-            <button
-              (click)="toggleProfile()"
-              class="relative group flex items-center justify-center w-9 h-9 rounded-full bg-red-600/15 border border-red-600/30 hover:border-red-600/70 hover:bg-red-600/25 transition-all duration-300 cursor-pointer outline-none overflow-hidden"
-              [class.border-red-600/70]="profileOpen()"
-              [class.bg-red-600/25]="profileOpen()"
-            >
-              @if (currentUser()?.picture) {
-                <img [src]="currentUser()?.picture" class="w-full h-full object-cover" />
-              } @else {
-                <span
-                  class="text-[0.65rem] font-black text-red-400 tracking-tight group-hover:text-red-300 transition-colors"
-                >
-                  {{ initials() }}
-                </span>
-              }
-            </button>
-
-            <div
-              class="absolute right-0 top-[calc(100%-8px)] w-72 bg-black border border-white/10 backdrop-blur-xl rounded-sm shadow-2xl transition-all duration-300 origin-top-right overflow-hidden"
-              [class.opacity-100]="profileOpen()"
-              [class.visible]="profileOpen()"
-              [class.scale-100]="profileOpen()"
-              [class.opacity-0]="!profileOpen()"
-              [class.invisible]="!profileOpen()"
-              [class.scale-95]="!profileOpen()"
-            >
-              <div
-                class="h-px w-full bg-gradient-to-r from-transparent via-red-600/60 to-transparent"
-              ></div>
-
-              <div class="px-6 pt-5 pb-4 flex items-center gap-4 border-b border-white/5">
-                <div class="relative shrink-0">
-                  <div
-                    class="w-11 h-11 rounded-full bg-red-600/15 border border-red-600/30 flex items-center justify-center overflow-hidden"
-                  >
-                    @if (currentUser()?.picture) {
-                      <img [src]="currentUser()?.picture" class="w-full h-full object-cover" />
-                    } @else {
-                      <span class="text-sm font-black text-red-400 tracking-tight">{{
-                        initials()
-                      }}</span>
-                    }
-                  </div>
-                  <span
-                    class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-black"
-                  ></span>
-                </div>
-                <div class="min-w-0">
-                  <p
-                    class="text-sm font-black text-white uppercase tracking-tight truncate leading-tight"
-                  >
-                    {{ currentUser()?.name ?? '—' }}
-                  </p>
-                  <p class="text-[0.65rem] text-gray-500 truncate mt-0.5">
-                    {{ currentUser()?.email }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="px-4 py-3">
-                <button
-                  (click)="logout()"
-                  class="w-full inline-flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-sm bg-white/5 border border-white/5 text-[0.65rem] font-bold tracking-[0.2em] uppercase text-gray-500 hover:bg-red-600 hover:border-red-600 hover:text-white hover:shadow-[0_0_16px_rgba(220,38,38,0.4)] active:scale-95 transition-all duration-300 cursor-pointer"
-                >
-                  <svg class="w-3 h-3" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          </li>
+          </div>
+          }
+          } @else {
+          <a [routerLink]="link.path" routerLinkActive="text-white after:opacity-100"
+            [routerLinkActiveOptions]="{ exact: !!link.exact }"
+            class="relative inline-flex items-center px-3 py-1.5 rounded-lg text-[13px] font-medium text-zinc-400 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 transition-colors after:content-[''] after:absolute after:left-3 after:right-3 after:-bottom-[11px] after:h-[2px] after:bg-red-500 after:opacity-0 after:transition-opacity">
+            {{ link.name }}
+          </a>
+          }
+        </li>
         }
       </ul>
 
-      <!-- Mobile Toggle Button -->
-      <button
-        class="md:hidden group relative w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:text-white transition-colors"
-        (click)="toggleMenu()"
-      >
+      @if (isUserAuth()) {
+      <div class="relative shrink-0 pl-4 border-l border-white/10">
+        <button type="button" (click)="toggleProfile()" [attr.aria-expanded]="profileOpen()" aria-label="Account menu"
+          class="inline-flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 transition-colors cursor-pointer"
+          [class.bg-white/[0.04]]="profileOpen()">
+          <span
+            class="w-7 h-7 rounded-lg bg-red-500/15 border border-red-400/35 flex items-center justify-center overflow-hidden shrink-0">
+            @if (currentUser()?.picture) {
+            <img [src]="currentUser()?.picture" [alt]="currentUser()?.name || 'User avatar'"
+              class="w-full h-full object-cover" />
+            } @else {
+            <span class="text-[11px] font-semibold text-red-200">{{ initials() }}</span>
+            }
+          </span>
+          <span class="text-[13px] font-medium text-zinc-200 max-w-32 truncate">
+            {{ currentUser()?.name ?? 'Account' }}
+          </span>
+          <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-150" [class.rotate-180]="profileOpen()"
+            aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        @if (profileOpen()) {
+        <div role="menu"
+          class="absolute right-0 top-full mt-2 w-64 rounded-lg bg-[#080b10] border border-white/12 shadow-xl shadow-black/60 overflow-hidden z-50">
+          <div class="px-4 py-3 border-b border-white/[0.08]">
+            <p class="text-[13px] font-semibold text-white truncate">{{ currentUser()?.name ?? '—' }}</p>
+            <p class="text-xs text-zinc-400 truncate mt-0.5">{{ currentUser()?.email }}</p>
+          </div>
+          <div class="p-1">
+            <button type="button" role="menuitem" (click)="logout()"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors cursor-pointer">
+              <span>Sign out</span>
+              <svg class="w-4 h-4 text-zinc-400" aria-hidden="true" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                  d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button type="button" (click)="toggleMenu()" [attr.aria-expanded]="isMenuOpen()"
+      [attr.aria-label]="isMenuOpen() ? 'Close navigation menu' : 'Open navigation menu'"
+      class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-zinc-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 transition-colors cursor-pointer">
+      <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        @if (isMenuOpen()) {
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        } @else {
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        }
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Mobile Navigation Panel -->
+  @if (isMenuOpen()) {
+  <div class="md:hidden bg-[#05070a]/95 backdrop-blur-md border-b border-white/[0.08] px-4 py-3 space-y-1">
+    @for (link of visibleLinks(); track link.name) {
+    @if (link.children) {
+    <div class="py-1.5">
+      <div class="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+        {{ link.name }}
+      </div>
+      <div class="mt-0.5 space-y-0.5">
+        @for (sub of link.children; track sub.name) {
+        <a [routerLink]="sub.path" (click)="toggleMenu()"
+          class="block px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white transition-colors">
+          {{ sub.name }}
+        </a>
+        }
+      </div>
+    </div>
+    } @else {
+    <a [routerLink]="link.path" routerLinkActive="text-white" [routerLinkActiveOptions]="{ exact: !!link.exact }"
+      (click)="toggleMenu()"
+      class="block px-3 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+      {{ link.name }}
+    </a>
+    }
+    }
+
+    @if (isUserAuth()) {
+    <div class="pt-3 mt-2 border-t border-white/[0.08] flex items-center justify-between gap-3 px-3">
+      <div class="flex items-center gap-2.5 min-w-0">
         <span
-          class="h-0.5 w-6 bg-current transition-all duration-300"
-          [class.rotate-45]="isMenuOpen()"
-          [class.translate-y-2.5]="isMenuOpen()"
-        ></span>
-        <span
-          class="h-0.5 w-6 bg-current transition-opacity"
-          [class.opacity-0]="isMenuOpen()"
-        ></span>
-        <span
-          class="h-0.5 w-6 bg-current transition-all duration-300"
-          [class.-rotate-45]="isMenuOpen()"
-          [class.-translate-y-2.5]="isMenuOpen()"
-        ></span>
+          class="w-8 h-8 rounded-lg bg-red-500/15 border border-red-400/35 flex items-center justify-center overflow-hidden shrink-0">
+          @if (currentUser()?.picture) {
+          <img [src]="currentUser()?.picture" [alt]="currentUser()?.name || 'User avatar'"
+            class="w-full h-full object-cover" />
+          } @else {
+          <span class="text-xs font-semibold text-red-200">{{ initials() }}</span>
+          }
+        </span>
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-white truncate">{{ currentUser()?.name ?? '—' }}</p>
+          <p class="text-xs text-zinc-400 truncate">{{ currentUser()?.email }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="logout()"
+        class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-200 hover:text-white border border-white/10 transition-colors cursor-pointer">
+        Sign out
       </button>
     </div>
+    }
   </div>
-
-  <!-- Mobile Dropdown Menu -->
-  @if (isMenuOpen()) {
-    <div
-      class="md:hidden bg-black/95 border-t border-white/5 px-8 py-10 max-h-[calc(100vh-5rem)] overflow-y-auto"
-    >
-      <ul class="flex flex-col space-y-8">
-        @for (link of visibleLinks(); track link.name; let i = $index) {
-          <li class="nav-stagger" [style.animation-delay.ms]="i * 50">
-            @if (link.children) {
-              <div
-                class="inline-block text-2xl font-black uppercase italic tracking-tighter text-gray-400 transition-all duration-300 hover:text-white mb-4"
-              >
-                {{ link.name }}
-              </div>
-              <ul class="flex flex-col space-y-4 pl-4 border-l border-red-600/30">
-                @for (sub of link.children; track sub.name) {
-                  <li>
-                    <a
-                      [routerLink]="sub.path"
-                      (click)="toggleMenu()"
-                      class="text-base font-black uppercase italic tracking-tighter text-gray-400 hover:text-white transition-all"
-                    >
-                      {{ sub.name }}
-                    </a>
-                  </li>
-                }
-              </ul>
-            } @else {
-              <a
-                [routerLink]="link.path"
-                routerLinkActive="text-red-600 translate-x-3"
-                (click)="toggleMenu()"
-                class="inline-block text-2xl font-black uppercase italic tracking-tighter text-gray-400 transition-all duration-300 hover:text-white"
-              >
-                {{ link.name }}
-              </a>
-            }
-          </li>
-        }
-
-        @if (isUserAuth()) {
-          <li class="pt-4 border-t border-white/10 flex flex-col gap-5">
-            <div class="flex items-center gap-4">
-              <div class="relative shrink-0">
-                <div
-                  class="w-12 h-12 rounded-full bg-red-600/15 border border-red-600/30 flex items-center justify-center overflow-hidden"
-                >
-                  @if (currentUser()?.picture) {
-                    <img [src]="currentUser()?.picture" class="w-full h-full object-cover" />
-                  } @else {
-                    <span class="text-base font-black text-red-400 tracking-tight">{{
-                      initials()
-                    }}</span>
-                  }
-                </div>
-                <span
-                  class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-black"
-                ></span>
-              </div>
-              <div class="min-w-0">
-                <p
-                  class="text-xl font-black uppercase tracking-tight text-white truncate leading-tight"
-                >
-                  {{ currentUser()?.name ?? '—' }}
-                </p>
-                <p class="text-xs text-gray-500 truncate">{{ currentUser()?.email }}</p>
-              </div>
-            </div>
-
-            <a
-              (click)="logout()"
-              class="text-2xl font-black uppercase italic tracking-tighter text-red-600 hover:text-red-400 transition-all cursor-pointer"
-            >
-              Sign Out
-            </a>
-          </li>
-        }
-      </ul>
-    </div>
   }
-</nav>
-
-<div class="h-20"></div>
+</header>

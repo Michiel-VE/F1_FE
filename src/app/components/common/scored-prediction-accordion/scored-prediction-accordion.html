@@ -1,0 +1,68 @@
+<div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+    @if (showHeader()) {
+    <div class="w-full flex items-center gap-4 p-4">
+        <button type="button" (click)="toggle()"
+            class="flex items-center gap-4 flex-1 hover:opacity-80 transition-opacity cursor-pointer">
+            @if (rank() !== null) {
+            <div
+                class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-950 border border-slate-700 font-mono text-xs font-bold text-slate-400">
+                {{ rank() }}
+            </div>
+            }
+
+            @if (picture()) {
+            <img [src]="picture()!" [alt]="title() ?? ''" class="w-7 h-7 rounded-full object-cover" />
+            }
+
+            @if (title()) {
+            <span class="flex-1 text-left text-sm font-semibold text-slate-200">{{ title() }}</span>
+            }
+
+            @if (totalScore() !== null) {
+            <span class="font-mono text-sm font-bold text-red-500">
+                {{ totalScore() }}<span class="text-slate-600">/{{ maxScore() }}</span>
+            </span>
+            }
+
+            <svg class="w-4 h-4 text-slate-500 transition-transform duration-200" [class.rotate-180]="expanded()"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+
+        @if (canKick()) {
+        <button type="button" (click)="kick.emit()"
+            class="ml-2 text-[0.55rem] font-bold uppercase tracking-widest px-2 py-1 border border-red-900/50 text-red-600 hover:bg-red-950/30 rounded-xs transition-colors cursor-pointer shrink-0">
+            Kick
+        </button>
+        }
+    </div>
+    }
+
+    @if (expanded()) {
+    <div class="divide-y divide-slate-800/60" [class.border-t]="showHeader()" [class.border-slate-800]="showHeader()">
+        @for (entry of entries(); track entry.team.id) {
+        <div class="flex items-center gap-3 px-4 py-2.5">
+            <span class="w-5 text-center font-mono text-xs text-slate-500">
+                {{ entry.predictedPosition }}
+            </span>
+            <span class="flex-1 text-sm text-slate-300">{{ entry.team.name }}</span>
+            <span class="text-xs">
+                @if (entry.actualPosition < entry.predictedPosition) { <span class="text-emerald-500">▲ {{
+                    entry.predictedPosition - entry.actualPosition }}</span>
+            } @else if (entry.actualPosition > entry.predictedPosition) {
+            <span class="text-red-500">▼ {{ entry.actualPosition - entry.predictedPosition }}</span>
+            } @else {
+            <span class="text-emerald-400">✓</span>
+            }
+            </span>
+            <span class="font-mono text-xs font-bold w-6 text-right" [class.text-emerald-400]="entry.points === 5"
+                [class.text-yellow-400]="entry.points === 3" [class.text-slate-400]="entry.points === 1"
+                [class.text-slate-600]="entry.points === 0">
+                +{{ entry.points }}
+            </span>
+        </div>
+        }
+    </div>
+    }
+</div>

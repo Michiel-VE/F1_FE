@@ -37,9 +37,11 @@ export class Driver {
   }
 
   openStats(): void {
+    const year = this.searchedYear();
     this.modalService.open(DriverResult, {
       driver: this.driver(),
-      selectedYear: this.searchedYear(),
+      selectedYear: year,
+      availableYears: [year],
     });
   }
 }

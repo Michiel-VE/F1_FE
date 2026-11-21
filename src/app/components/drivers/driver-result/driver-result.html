@@ -2,40 +2,23 @@
   <div
     class="flex flex-col-reverse sm:flex-row h-[100dvh] w-full bg-slate-950 text-slate-100 font-sans selection:bg-blue-500/30 overflow-hidden">
 
-    <!-- Season Sidebar Navigation -->
-    <aside class="
-        flex flex-row items-center gap-3 px-4 py-3 overflow-x-auto
-        border-t border-white/10 bg-slate-900/80 backdrop-blur-xl
-        sm:flex-col sm:w-28 sm:border-r sm:border-t-0 sm:py-8 sm:px-3 sm:gap-4 sm:overflow-x-visible sm:overflow-y-auto
-        shrink-0 z-20 shadow-2xl
-      ">
-      <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] shrink-0 sm:mb-2 text-center">
-        Seasons
-      </div>
-
-      @for (year of availableYears(); track year) {
-      <button type="button" (click)="selectedYear.set(year)" [class]="
-            selectedYear() === year
-              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-400/30 scale-105'
-              : 'bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.08] border border-white/5'
-          "
-        class="w-12 h-12 sm:w-full sm:h-14 rounded-2xl font-black text-sm transition-all duration-300 active:scale-95 flex items-center justify-center shrink-0">
-        <span>{{ year }}</span>
-      </button>
-      }
-    </aside>
-
     <!-- Main Content Area -->
     <main class="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col overflow-hidden min-h-0 relative">
 
       <!-- Header Section -->
-      <header class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end mb-4 sm:mb-6 shrink-0">
+      <header
+        class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end mb-4 sm:mb-6 pr-12 sm:pr-14 shrink-0">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-            <h2 class="text-blue-400 font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase font-bold">
+            <h2 class="text-blue-400 font-mono text-xs tracking-[0.25em] uppercase font-bold">
               {{ driver().firstname }} {{ driver().lastname }}
             </h2>
+            <span class="text-slate-600 text-xs" aria-hidden="true">/</span>
+            <span
+              class="px-2.5 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-300 font-mono text-xs font-bold tracking-wider">
+              SEASON {{ selectedYear() }}
+            </span>
           </div>
           <h1
             class="text-3xl sm:text-4xl lg:text-5xl font-black italic uppercase tracking-tighter leading-none text-white">
@@ -44,11 +27,11 @@
           </h1>
         </div>
 
-        <div class="flex items-center gap-4">
-          @if (rawResults().length > 0) {
+        <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+          @if (!isLoading() && rawResults().length > 0) {
           <div
             class="px-4 py-2 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md flex flex-col items-end">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Season Points</span>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Season Points</span>
             <span class="text-xl sm:text-2xl font-black text-blue-400 tracking-tight">{{ totalPointsSum() }} pts</span>
           </div>
           }
@@ -63,38 +46,26 @@
         </div>
       </header>
 
-      <!-- Chart Display Container -->
+      <!-- Chart / Loading / Error Display Container -->
       <div class="flex-1 relative min-h-0 w-full">
-
-        <!-- Empty State -->
+        @if (isLoading()) {
         <div
-          class="absolute inset-0 flex flex-col items-center justify-center gap-6 text-center transition-all duration-300 z-20 bg-slate-950/60 backdrop-blur-md rounded-[2rem]"
-          [class.opacity-0]="rawResults().length > 0" [class.pointer-events-none]="rawResults().length > 0">
-          <div
-            class="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-slate-500 shadow-inner">
-            <svg class="w-8 h-8 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-            </svg>
+          class="w-full h-full bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 flex flex-col justify-between gap-4 animate-pulse">
+          <div class="flex items-center justify-between">
+            <div class="h-4 w-32 bg-white/[0.07] rounded"></div>
+            <div class="h-4 w-24 bg-white/[0.06] rounded"></div>
           </div>
-          <div class="flex flex-col items-center gap-1">
-            <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500">
-              {{ selectedYear() }} Championship
-            </span>
-            <p class="text-3xl sm:text-4xl font-black italic uppercase tracking-tighter text-slate-300">
-              No Grand Prix Entries
-            </p>
-          </div>
-          <p class="text-slate-400 text-sm max-w-sm tracking-wide">
-            <span class="text-white font-semibold">{{ driver().firstname }} {{ driver().lastname }}</span> did not
-            participate during this season.
-          </p>
+          <div class="flex-1 w-full bg-white/[0.04] rounded-2xl"></div>
         </div>
-
-        <!-- Chart Canvas Box -->
+        } @else if (error(); as err) {
+        <div class="w-full h-full flex items-center justify-center p-4">
+          <div class="w-full max-w-lg">
+            <app-error [error]="err" (retry)="retry()" />
+          </div>
+        </div>
+        } @else {
         <div
-          class="w-full h-full bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-2xl border border-white/10 rounded-[2rem] p-4 sm:p-6 relative shadow-2xl overflow-hidden transition-all duration-300 z-10 flex flex-col"
-          [class.opacity-0]="rawResults().length === 0" [class.pointer-events-none]="rawResults().length === 0">
+          class="w-full h-full bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-2xl border border-white/10 rounded-[2rem] p-4 sm:p-6 relative shadow-2xl overflow-hidden flex flex-col">
           <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/10 blur-[140px] rounded-full pointer-events-none">
           </div>
           <div
@@ -106,7 +77,7 @@
             </canvas>
           </div>
         </div>
-
+        }
       </div>
 
     </main>

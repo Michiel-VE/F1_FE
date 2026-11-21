@@ -5,12 +5,14 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { DriverResultService } from '../../../services/driver-result/driver-result-service';
 import { MODAL_DATA } from '../../../services/modal/modal';
 import { Driver } from '../../../interfaces/driver';
+import { ErrorState } from '../../../interfaces/error-state';
+import { Error as ErrorBanner } from '../../common/error/error';
 import { ModalShell } from '../../modals/modal-shell';
 
 @Component({
   selector: 'app-driver-result',
   standalone: true,
-  imports: [BaseChartDirective, CommonModule, ModalShell],
+  imports: [BaseChartDirective, CommonModule, ModalShell, ErrorBanner],
   templateUrl: './driver-result.html',
   styleUrl: './driver-result.css',
 })
@@ -23,42 +25,81 @@ export class DriverResult {
   private service = inject(DriverResultService);
 
   readonly CURRENT_YEAR = new Date().getFullYear().toString();
+  private readonly initialYear = this.data?.selectedYear ?? this.CURRENT_YEAR;
 
   availableYears = signal<string[]>(
-    this.data?.availableYears ??
-      Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()),
+    this.data?.availableYears?.length ? this.data.availableYears : [this.initialYear],
   );
 
   driver = signal(this.data?.driver);
-  selectedYear = signal(this.data?.selectedYear ?? this.CURRENT_YEAR);
+  selectedYear = signal(this.initialYear);
   rawResults = signal<any[]>([]);
   historicalAvg = signal<number>(0);
+  isLoading = signal<boolean>(true);
+  error = signal<ErrorState | null>(null);
 
   constructor() {
     effect(() => {
       const year = this.selectedYear();
       const driverId = this.driver().driverId;
 
+      this.isLoading.set(true);
+      this.error.set(null);
+
       if (year === this.CURRENT_YEAR) {
         this.service.getRaceResultsWithHistory(driverId, year).subscribe({
           next: (res) => {
-            this.rawResults.set(res.current.results ?? []);
+            const results = res.current.results ?? [];
+            this.rawResults.set(results);
             this.historicalAvg.set(res.historicalAvg);
+            this.error.set(
+              results.length
+                ? null
+                : {
+                    message: `${this.driver().firstname} ${this.driver().lastname} did not participate during the ${year} season.`,
+                    canRetry: false,
+                    timestamp: new Date(),
+                  },
+            );
+            this.isLoading.set(false);
           },
           error: () => {
             this.rawResults.set([]);
             this.historicalAvg.set(0);
+            this.error.set({
+              message: `Failed to load ${year} race results.`,
+              canRetry: true,
+              timestamp: new Date(),
+            });
+            this.isLoading.set(false);
           },
         });
       } else {
         this.service.getRaceResults(driverId, year).subscribe({
           next: (res) => {
-            this.rawResults.set(res.results ?? []);
+            const results = res.results ?? [];
+            this.rawResults.set(results);
             this.historicalAvg.set(0);
+            this.error.set(
+              results.length
+                ? null
+                : {
+                    message: `${this.driver().firstname} ${this.driver().lastname} did not participate during the ${year} season.`,
+                    canRetry: false,
+                    timestamp: new Date(),
+                  },
+            );
+            this.isLoading.set(false);
           },
           error: () => {
             this.rawResults.set([]);
             this.historicalAvg.set(0);
+            this.error.set({
+              message: `Failed to load ${year} race results.`,
+              canRetry: true,
+              timestamp: new Date(),
+            });
+            this.isLoading.set(false);
           },
         });
       }
@@ -71,6 +112,12 @@ export class DriverResult {
         window.dispatchEvent(new Event('resize'));
       }, 50);
     });
+  }
+
+  retry(): void {
+    const year = this.selectedYear();
+    this.selectedYear.set('');
+    queueMicrotask(() => this.selectedYear.set(year));
   }
 
   // Computes the total sum of both regular points and sprint points across all rounds

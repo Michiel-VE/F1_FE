@@ -5,15 +5,12 @@ import { AuthService } from '../../../services/auth/auth-service';
 import { ToastService } from '../../../services/toast/toast-service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Team } from '../../../interfaces/team';
+import {
+  ScoredPredictionAccordion,
+  ScoredEntry,
+} from '../../common/scored-prediction-accordion/scored-prediction-accordion';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
-interface ScoredEntry {
-  team: Team;
-  predictedPosition: number;
-  actualPosition: number;
-  points: number;
-}
+import { catchError, take } from 'rxjs/operators';
 
 interface MemberScore {
   userId: string;
@@ -27,7 +24,7 @@ interface MemberScore {
 @Component({
   selector: 'app-prediction-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ScoredPredictionAccordion],
   templateUrl: './prediction-view.html',
   styleUrl: './prediction-view.css',
 })
@@ -44,6 +41,7 @@ export class PredictionView implements OnInit {
   readonly memberScores = signal<MemberScore[]>([]);
   readonly poolCreatorId = signal<string | null>(null);
   readonly showLeaveConfirm = signal<boolean>(false);
+  readonly isLoading = signal<boolean>(true);
 
   readonly currentUserId = computed(() => this.authService.currentUser()?.id ?? null);
   readonly isCreator = computed(
@@ -65,27 +63,28 @@ export class PredictionView implements OnInit {
 
   readonly scoredTeams = computed(() => this.scoreTeams(this.savedTeams()));
 
-  readonly totalScore = computed(() =>
-    this.scoredTeams().reduce((sum, s) => sum + s.points, 0),
-  );
+  readonly totalScore = computed(() => this.scoredTeams().reduce((sum, s) => sum + s.points, 0));
 
   readonly maxScore = computed(() => this.savedTeams().length * 5);
 
   ngOnInit(): void {
     const poolId = this.route.snapshot.paramMap.get('poolId');
     this.poolId.set(poolId);
+    this.isLoading.set(true);
 
     const requests: any = {
-      teams: this.predictionService.getTeamsForPrediction<Team[]>(),
-      savedPrediction: this.predictionService
-        .getSavedPrediction(poolId)
-        .pipe(catchError(() => of(null))),
+      teams: this.predictionService.getTeamsForPrediction<Team[]>().pipe(take(1)),
+      savedPrediction: this.predictionService.getSavedPrediction(poolId).pipe(
+        take(1),
+        catchError(() => of(null)),
+      ),
     };
 
     if (poolId) {
-      requests.poolDetails = this.predictionService
-        .getPoolDetails(poolId)
-        .pipe(catchError(() => of(null)));
+      requests.poolDetails = this.predictionService.getPoolDetails(poolId).pipe(
+        take(1),
+        catchError(() => of(null)),
+      );
     }
 
     forkJoin(requests).subscribe({
@@ -98,6 +97,7 @@ export class PredictionView implements OnInit {
           .filter((t: Team | undefined): t is Team => !!t);
 
         if (!poolId && orderedList.length === 0) {
+          this.isLoading.set(false);
           this.router.navigate(['/prediction/editor']);
           return;
         }
@@ -107,7 +107,7 @@ export class PredictionView implements OnInit {
         if (poolDetails) {
           this.poolCreatorId.set(poolDetails.creatorId ?? null);
 
-          if (poolDetails.leaderBoard) {
+          if (Array.isArray(poolDetails.leaderBoard)) {
             const scores: MemberScore[] = poolDetails.leaderBoard
               .map((member: any) => {
                 const memberTeams: Team[] = (member.predictedTeamIds ?? [])
@@ -131,8 +131,13 @@ export class PredictionView implements OnInit {
             this.memberScores.set(scores);
           }
         }
+
+        this.isLoading.set(false);
       },
-      error: (err: any) => console.error('Failed to load prediction layout', err),
+      error: (err: any) => {
+        console.error('Failed to load prediction layout', err);
+        this.isLoading.set(false);
+      },
     });
   }
 
@@ -151,9 +156,11 @@ export class PredictionView implements OnInit {
     });
   }
 
-  toggleMember(index: number): void {
+  toggleMember(index: number, expanded?: boolean): void {
     this.memberScores.update((scores) =>
-      scores.map((s, i) => (i === index ? { ...s, expanded: !s.expanded } : s)),
+      scores.map((s, i) =>
+        i === index ? { ...s, expanded: expanded !== undefined ? expanded : !s.expanded } : s,
+      ),
     );
   }
 
@@ -185,8 +192,7 @@ export class PredictionView implements OnInit {
         this.router.navigate(['/prediction']);
       },
       error: (err: any) => {
-        const errorMessage =
-          err.error?.error || err.error?.message || 'Failed to process request.';
+        const errorMessage = err.error?.error || err.error?.message || 'Failed to process request.';
         this.toastService.show(errorMessage, 'error');
       },
     });

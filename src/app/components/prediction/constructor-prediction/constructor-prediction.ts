@@ -7,6 +7,10 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 import { DragDropModule, CdkDragDrop, CdkDragStart, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PredictionHeader } from '../../common/prediction-header/prediction-header';
+import {
+  ScoredPredictionAccordion,
+  ScoredEntry,
+} from '../../common/scored-prediction-accordion/scored-prediction-accordion';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -48,7 +52,7 @@ export interface DragPreview {
 @Component({
   selector: 'app-constructor-prediction',
   standalone: true,
-  imports: [CommonModule, DragDropModule, PredictionHeader],
+  imports: [CommonModule, DragDropModule, PredictionHeader, ScoredPredictionAccordion],
   templateUrl: './constructor-prediction.html',
   styleUrl: './constructor-prediction.css',
   animations: [listAnimation, fadeIn],
@@ -88,6 +92,31 @@ export class ConstructorPrediction implements OnInit {
     const totalSlots = Math.ceil(total / cols) * cols;
     return Array(Math.max(0, totalSlots - visible)).fill(0);
   });
+
+  readonly actualStandings = computed(() =>
+    [...this.allTeams()].sort((a, b) => b.totalPoints - a.totalPoints),
+  );
+
+  readonly previewScoredEntries = computed<ScoredEntry[]>(() => {
+    const actual = this.actualStandings();
+    return this.rankedSelection().map((team, predictedIndex) => {
+      const actualIndex = actual.findIndex((t) => t.id === team.id);
+      const diff = Math.abs(predictedIndex - actualIndex);
+      const points = diff === 0 ? 5 : diff === 1 ? 3 : diff === 2 ? 1 : 0;
+      return {
+        team,
+        predictedPosition: predictedIndex + 1,
+        actualPosition: actualIndex + 1,
+        points,
+      };
+    });
+  });
+
+  readonly previewTotalScore = computed(() =>
+    this.previewScoredEntries().reduce((sum, entry) => sum + entry.points, 0),
+  );
+
+  readonly previewMaxScore = computed(() => this.rankedSelection().length * 5);
 
   ngOnInit(): void {
     const pathPoolId = this.route.snapshot.paramMap.get('poolId');

@@ -9,6 +9,16 @@ export const routes: Routes = [
     loadComponent: () => import('./components/drivers/drivers').then((m) => m.Drivers),
   },
   {
+    path: 'drivers/career-history',
+    loadComponent: () =>
+      import('./components/drivers/career-history/career-history').then((m) => m.CareerHistory),
+  },
+  {
+    path: 'drivers/career-history/:lastName',
+    loadComponent: () =>
+      import('./components/drivers/career-history/career-history').then((m) => m.CareerHistory),
+  },
+  {
     path: 'teams',
     loadComponent: () => import('./components/teams/teams').then((m) => m.Teams),
   },

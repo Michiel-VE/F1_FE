@@ -51,7 +51,7 @@
         </div>
 
         <div class="relative z-10 mt-auto">
-          <a [routerLink]="item.linkTo ? [item.linkTo] : null" class="inline-flex items-center gap-4 py-3.5 px-8 cursor-pointer rounded-lg bg-white/5 border border-white/10 text-[0.7rem] font-bold tracking-[0.2em] uppercase 
+          <a [routerLink]="item.linkTo ? [item.linkTo] : null" [state]="item.state ?? undefined" class="inline-flex items-center gap-4 py-3.5 px-8 cursor-pointer rounded-lg bg-white/5 border border-white/10 text-[0.7rem] font-bold tracking-[0.2em] uppercase 
                      hover:bg-red-600 hover:border-red-600 hover:text-white hover:shadow-[0_0_20px_rgba(220,38,38,0.5)] 
                      active:scale-95 transition-all duration-300">
             {{ item.btn }}

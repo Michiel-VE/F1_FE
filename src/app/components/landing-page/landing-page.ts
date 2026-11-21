@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-
 import { RouterLink } from '@angular/router';
 
 interface Endpoint {
@@ -7,6 +6,7 @@ interface Endpoint {
   desc: string;
   btn: string;
   linkTo?: string;
+  state?: Record<string, unknown>;
 }
 
 @Component({
@@ -31,6 +31,8 @@ export class LandingPage {
       title: 'Career History',
       desc: 'Explore a driver’s full career statistics and performance timeline.',
       btn: 'Explore',
+      linkTo: '/drivers/career-history',
+      state: { random: true },
     },
   ]);
 }
